@@ -35,3 +35,5 @@ Collate:
     'data.R'
     'mizerHowTo-package.R'
 RoxygenNote: 7.1.1
+URL: https://github.com/gustavdelius/mizerHowTo
+BugReports: https://github.com/gustavdelius/mizerHowTo/issues
