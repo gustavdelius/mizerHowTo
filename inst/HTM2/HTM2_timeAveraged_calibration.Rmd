@@ -1,0 +1,365 @@
+---
+title: "How to Mizer - how to calibrate/refine a mizer model to time-averaged catch data"
+author: "Julia L. Blanchard, Ken H. Andersen, Gustav Delius, Romain Forestier"
+date: "`r Sys.Date()`"
+place: Hobart, Australia
+output:
+  html_document: default
+  # pdf_document: default
+always_allow_html: true
+#runtime: shiny
+---
+
+
+```{r set up, message = F, echo = F}
+source("../utility.R")
+# loading HTM1 data
+sim_guessed <- readRDS("../HTM1/HTM1_sim.rds")
+params_guessed <- sim_guessed@params
+
+# database
+# fisheries mortality F
+fMat <- read.csv("../data/fmat.csv")
+# fMatWeighted <- read.csv("data/fmatWeighted.csv") # Sandeel and Cod have multiple data base so average their F and weighting by SSB
+fMatWeighted <- readRDS("../data/FmatWeightedInterpolated.rds") # to get Gurnard data
+# read in time-averaged  catches  
+catchAvg <-read.csv("../data/time-averaged-catches.csv") # only that one is used at the moment | catches are estimated from fMatW
+# ssb
+ssbAvg <- read.csv("../data/time-averaged-SSB.csv")
+```
+
+
+# Intermediate level tutorial - how to calibrate a Mizer model
+
+In this tutorial you will learn 
+
+- How to refine key parameters using optimization so the model is in the right ballpark as the data
+
+- Simple calibration protocol - shown sequentially for `R_max`, `erepro` and `kappa`
+
+- Introduce rShiny for model exploration
+
+
+In this tutorial, we are going to follow the same path as HTM1 and keep using the North Sea data set as an example.
+
+We finished HTM1 with a manually parametrised model with species coexisting, now we want our model to reflect reality. To do so we are going to compare the model output to data by matching catch, biomass and/or growth rate depending on what is available.
+
+In the plot below we compare the catch output of the model and the averaged catch we extracted from the ICES database in the previous tutorial using the function `plotPredObsYield`. This is going to be our main comparison used to calibrate the model towards more real life behavior.
+
+
+```{r step 0 - observed/predicted catches, echo = F}
+plotPredObsYield(sim_guessed,catchAvg$Catch_1419_tonnes) 
+```
+
+At the moment, the observed yield are higher than the predicted yield for all species. We want them to be equal (on the diagonal).
+
+
+
+## Step 1. Calibrate the maximum recruitment
+
+In this section you will:
+
+- use a package that will calibrate `R_max` per species
+
+`R_max` affects the relative biomass of each species (and, combined with the fishing parameters, the catches). We are going to change with the aim of minimising the error between observed and estimated catches or biomasses. Both `erepro` and `kappa` affect the relative biomass of each species and can be used (as in Blanchard et al. 2014 & Spence et al. 2016) but for now we are going to keep them at default value and focus on `R_max` only.
+
+First let's set up a function running the model and outputing the difference between predicted catches (`getYield()`) and actual catches (`catchAvg`). `getError()` outputs the sum of squared errors between the two.
+
+```{r step 1 - getError | result}
+# we need 12 Rmaxs, log10 scale
+vary <- log10(params_guessed@species_params$R_max)
+## test it
+getError(vary = vary, params = params_guessed, dat = catchAvg$Catch_1419_tonnes)
+
+```
+
+
+Now, carry out the optimisation. There are several optimisation methods to choose from - we need to select the most robust one to share here. The R package `optimParallel` seems to be the most robust general R package and has replaced optim. Often this requires repeating the procedure several times but the advantage of using parallel run is the speed compared to packages such as optimx.
+
+This might take AWHILE. The output is saved as `optimParallel_Rmax.RDS` if you wish to skip this block.
+
+```{r step 1 - optimisation, message = F, eval=F}
+# create set of params for the optimisation process
+params_optim <- params_guessed
+vary <-  log10(params_optim@species_params$R_max) # variable to explore
+params_optim<-setParams(params_optim)
+# set up workers
+noCores <- detectCores() - 1 # keep some spare core
+cl <- makeCluster(noCores, setup_timeout = 0.5)
+setDefaultCluster(cl = cl)
+clusterExport(cl, as.list(ls()))
+clusterEvalQ(cl, {
+  library(mizerExperimental)
+  library(optimParallel)
+})
+optim_result <-optimParallel(par=vary,getError,params=params_optim, dat = catchAvg$Catch_1419_tonnes, method   ="L-BFGS-B",lower=c(rep(3,12)),upper= c(rep(15,12)),
+                            parallel=list(loginfo=TRUE, forward=TRUE))
+stopCluster(cl)
+saveRDS(optim_result,"optimParallel_Rmax1.RDS")
+```
+
+
+```{r step 1 - results, message=FALSE,warning=FALSE}
+# if previous block was not evaluated
+params_optim <- params_guessed
+optim_result <- readRDS("optimParallel_Rmax1.RDS")
+# optim values:
+params_optim@species_params$R_max <- 10^optim_result$par 
+params_optim <-setParams(params_optim)
+sim_optim <- project(params_optim, effort = 1, t_max = 100, dt=0.1,initial_n = sim_guessed@n[100,,],initial_n_pp = sim_guessed@n_pp[100,])
+saveRDS(sim_optim,"sim_optim1.RDS")
+plotCalibration(sim_optim,catch_dat = catchAvg$Catch_1419_tonnes )
+```
+
+Calibrating for best observed/predicted yield makes one species (Sprat) show signs of collapse. We need to look at other parameters to get the community to coexist again.
+
+
+
+## Step 2. Calibrate the recruitment with erepro.
+
+In this section you will:
+
+- Look at effect of `erepro` on the reproductive outputs
+
+- Check what impact `erepro` has on the $F_{msy}$
+
+
+`erepro` represents the energy conversion efficiency between energy allocated to reproduction and the actual spawn. Lowering `erepro` biologically means higher egg mortality rate or wasteful energy invested into gonads. For example, `erepro` is currently set to $0.01$ meaning, that for every one $g$ of mass allocated to reproduction, $0.01g$ will be used as spawn recruitment, the rest is lost. This coefficient is applied before any density-dependence requirement. Let's use Rshiny to see how varying `erepro` influences the ecosystem (to play around).
+
+
+> Rshiny app erepro
+
+
+```{r step 2 rshiny-erepro, eval = F, echo = F}
+runApp("../shiny_erepro")
+```
+
+
+A good indicator of realistic `erepro` value is the shape of the fishing mortality rate versus yield curve. Such graph allows to determine the fisheries maximum sustainbale yield when harvesting a species and is supposed to have a bell shape. Too high fishing mortality depletes the stock and reduce the yield whereas too low fishing mortality simply means low yield. The $F_{msy}$ sits in the middle, at the top of the bell. If a species is too reproduction efficient and can replenish its biomass even under high fisheries mortality, its `erepro` is too high. Conversely, if a low fisheries mortality depletes the stock right away, the species' `erepro` is too low.
+
+Let's take a look at the current $F_{msy}$ per species. 
+
+```{r step 2 - Fmsy | data crunching, eval=F, echo = F}
+# Not evaluated because slow (especially at high effortRes)
+plot_dat <- plotFmsy(params_optim, returnData = T, effortRes = 50)
+saveRDS(plot_dat, "Fmsy1.rds")
+```
+
+
+```{r step 2 - Fmsy | plots, warning=F, echo = F}
+plot_dat <- readRDS("Fmsy1.rds")
+ggplot(plot_dat) +
+  geom_line(aes(x = effort , y = yield, color = species))+
+  facet_wrap(species~., scales = "free") +
+  scale_x_continuous(limits= c(0,1.5),name = "fishing mortality rate")+
+  scale_y_continuous(trans = "log10") +
+  scale_color_manual(name = "Species", values = sim_optim@params@linecolour) +
+  theme(legend.position = "none", 
+        legend.key = element_rect(fill = "white"),
+        panel.background = element_blank(), 
+        panel.grid.minor = element_line(color = "gray"),
+        strip.background = element_blank())
+```
+
+Decreasing `erepro` is going to move the $F_{msy}$ towards lower effort. Until now we had the same `erepro` for all species but we can input species-specific values to calibrate our recruitment. To do so, let's use another shiny app again. The next one allows you to change `erepro` one at a time and see the effect on the species' $F_{msy}$
+
+> Rshiny app Fmsy
+> Note: the shiny app only calculate the $F_{msy}$ of one species at a time (for speed reasons) and the final results may not be exactly the same as calculating the $F_{msy}$ for every species together (as shown below)
+
+```{r step 2 - rshiny-fmsy, eval = F, echo = F}
+runApp("../shiny_fmsy")
+```
+
+Let's see what our system looks like with species-specific `erepro`
+
+```{r step 2 - Fmsy with tweaked erepro, warning=F}
+sim_optim <- readRDS("sim_optim1.RDS")
+params_optim <- sim_optim@params # redundancy if previous blocks were not run 
+params_optim@species_params$erepro <- 10^(c(-1.7,-3.2,-4,-4,-3,-3.5,-3.5,-4.1,-2.7,-3,-2.5,-1.7))
+params_optim2 <- setParams(params_optim)
+sim_optim2 <- project(params_optim2, effort = 1, t_max = 100)
+saveRDS(sim_optim2, file = "sim_optim2.RDS")
+```
+
+
+```{r step 2 - Fmsy plot 2, warning=F, eval = F, echo = F}
+plot_dat <- plotFmsy(params_optim2, effortRes = 50, returnData = T)
+saveRDS(plot_dat, "Fmsy2.rds")
+```
+
+
+```{r step 2 - Fmsy with tweaked erepro summary, warning=F, echo = F}
+
+plotCalibration(sim_optim2)
+
+plot_dat <- readRDS("Fmsy2.rds")
+ggplot(plot_dat) +
+  geom_line(aes(x = effort , y = yield, color = species))+
+  facet_wrap(species~., scales = "free") +
+  scale_x_continuous(limits= c(0,1.5),name = "fishing mortality rate")+
+  scale_y_continuous(trans = "log10") +
+  scale_color_manual(name = "Species", values = sim_optim@params@linecolour) +
+  theme(legend.position = "none", 
+        legend.key = element_rect(fill = "white"),
+        panel.background = element_blank(), 
+        panel.grid.minor = element_line(color = "gray"),
+        strip.background = element_blank())
+
+```
+
+Some trade-offs here, relatively high `erepro` allows Sprat to coexist with the other species but the $F_{msy}$ plot doesn't have the characteristic bell shape. Here Sprat is too efficient and survive even at high fisheries mortality. Note that the curve could start to go down at higher fisheries mortality.
+
+Before spending more tome hand tweaking these species, we are going to run the `R_max` calibration again to see if we improved the yield match (as in step 1).
+
+Itering the calibration process multiple times can help find better `R_max` values as the first run of `optimParallel` may not find the best combination of `R_max` in the first go. Below it an example of `optimParallel` being looped five times with 
+
+```{r step 2 - looping rmax calibration crunch, message = F, eval=F}
+# looping calibration to get more accurate results
+sim_loop <- readRDS(file = "sim_optim2.RDS")
+params_loop <- sim_loop@params
+for(i in 1:5)
+{
+# saving the last time step in the param object
+params_loop@initial_n <- sim_loop@n[dim(sim_loop@n)[1],,]
+params_loop@initial_n_pp <- sim_loop@n_pp[dim(sim_loop@n_pp)[1],]
+params_calibration <- params_loop
+vary <-  log10(params_calibration@species_params$R_max)
+params_calibration<-setParams(params_calibration)
+noCores <- detectCores() - 1 # keep a spare core
+cl <- makeCluster(noCores, setup_timeout = 0.5)
+setDefaultCluster(cl = cl)
+clusterExport(cl, as.list(ls()))
+clusterEvalQ(cl, {
+  library(mizerExperimental)
+  library(optimParallel)
+})
+optim_loop <-optimParallel(par=vary,getError,params=params_calibration, dat = catchAvg$Catch_1419_tonnes, 
+                             method   ="L-BFGS-B",lower=c(rep(3,12)),upper= c(rep(15,12)),
+                            parallel=list(loginfo=TRUE, forward=TRUE))
+stopCluster(cl)
+
+# optim values:
+params_loop@species_params$R_max <- 10^optim_loop$par 
+# set the param object 
+params_loop <-setParams(params_loop)
+sim_loop <- project(params_loop, effort = 1, t_max = 100, dt=0.1, initial_n = params_loop@initial_n ,
+                      initial_n_pp = params_loop@initial_n_pp)
+}
+saveRDS(optim_loop,"optimParallel_Rmax2.RDS")
+
+```
+
+```{r saving sim, eval = F}
+# running sim a bit longer before saving it
+sim_loop <- project(params_loop, effort = 1, t_max = 300)
+params_loop@initial_n <- sim_loop@n[dim(sim_loop@n)[1],,]
+params_loop@initial_n_pp <- sim_loop@n_pp[dim(sim_loop@n_pp)[1],]
+sim_loop <- project(params_loop, effort = 1)
+saveRDS(sim_loop,"sim_optim3.RDS")
+```
+
+
+```{r sim loop diag, eval = T, echo = F}
+
+sim_loop <- readRDS("sim_optim3.RDS")
+plotCalibration(sim_loop, catch_dat = catchAvg$Catch_1419_tonnes)
+```
+
+
+The different species look more spread around the x = y line but the scale is also three times smaller than the previous plot. Here, only Sandeel is an outlier.
+
+## Step 3. Calibrating the growth
+
+In this section you will:
+
+- Look at the growth curves of each species
+
+- Tweak the `kappa` parameter to adjust the growth curves of all species at once
+
+- Tweak the `gamma` parameter to adjust the growth curve species by species
+
+
+```{r step 3 - growth curves prior, echo=F}
+plotGrowthCurves2(sim_loop, species_panel = T)
+```
+
+Most species have a growth curve similar to the expected von Bertalanffy growth curve, apart from Spart and Sandeel which have much slower growth than expected. `kappa`, which is the carrying capacity of the background spectrum will affect the food availability and therefore the growth rate (more food means faster growth). However, changing `kappa` will affect all growth curves. If only a few species are off, we need to change the `gamma` parameter (search volume) per species.
+
+
+
+```{r step 3 - feeding level, echo = F}
+plotFeedingLevel2(sim_loop, include_critical = T)
+```
+
+The feeding level here shows that the species reaching the highest size classes have a feeding level close to one, meaning that they feed to satiation. Let's look at their diet to check what makes them to full.
+
+```{r step 3 - diets, warning=F, echo = F}
+plotDiet2(sim_loop)
+```
+
+The diets look great as the fish feed on each other and do not rely too much on the background spectrum. We can still reduce the carrying capacity of the background spectrum even more, which could lower the feeding level of the species. Let's do this using the Rshiny app
+
+
+> Rshiny app kappa
+
+```{r step 3 rshiny-kappa, eval = F, echo =F}
+runApp("../shiny_kappa")
+```
+
+
+Decreasing slightly `kappa` drives Sprat to extinction probably as it becomes the next choice of food when we reduce the size of the background spectrum (as we saw on the diet plots). So how can we reduce the feeding level of the largest predators while keeping Sprat alive?
+
+```{r step 3 - kappa tweak, include = F, eval = F, echo = T}
+params_growth <- sim_loop@params
+# updating param parameters
+params_growth@resource_params$kappa<- 10^11 # value taken from shiny
+params_growth <-setParams(params_growth)
+sim_growth <- project(params_growth, effort = 1, t_max = 100, dt=0.1)
+plotGrowthCurves2(sim_growth, species_panel = T)
+plotCalibration(sim_growth)
+
+```
+
+Such values stop species from growing too fast. Now let's help the one growing too slow. The most important part of the curve is at the beginning before species reach maturation size. Slowing down growth will delay maturation and can lead to fluctuation in biomass. The feeding level will be close to critical at small size, creating these fluctuations (species compete to much for food). One will notice that changing the `gamma` of one species will affects other, Sprat and its predators as Sprat is a huge part of the diet of some.
+
+> Rshiny app gamma
+
+```{r step 3 rshiny-gamma, eval = F, echo = F}
+runApp("../shiny_gamma/")
+```
+
+
+
+Let's input the new gamma value in a new set of parameters
+
+```{r step 3 updating gamma}
+newGamma <- c(1.100000e-10, 6.000000e-11, 9.910525e-11, 7.707098e-11, 2.556902e-11, 4.717030e-11,
+              5.272039e-11, 1.009092e-10, 4.565019e-11, 7.837794e-11, 4.000000e-10, 2.365167e-10)
+
+params_growth <- sim_loop@params
+params_growth@species_params$gamma <- newGamma
+params_growth <- setParams(params_growth)
+sim_growth <- project(params_growth, effort = 1, t_max = 100)
+
+plotCalibration(sim_growth, catch_dat = catchAvg$Catch_1419_tonnes)
+```
+
+Small oscillations but the species stabilise again.
+
+```{r step 3 new gamma growth, echo = F}
+plotGrowthCurves2(sim_growth, species_panel = T)
+
+plotFeedingLevel2(sim_growth, include_critical = T)
+```
+
+Growth curves haven't change much but the feeding level has decreased at small size (even if we theoretically increase the feeding of the small species, maybe they are now too good competitor for the other species and steal their food)
+
+```{r step 3 diets, warning=F, echo = F}
+plotDiet2(sim_growth)
+
+```
+
+
+One will note that changing the the search volume of some species did not affect the diet. Therefore `gamma` doesn't influence the diet proportion.
+
+
