@@ -22,8 +22,8 @@ g_legend<-function(a.gplot){
 
 
 #' compare outputs
+#'
 #' @export
-#' @examples yo
 getError <- function(vary,params,dat,data_type="catch", tol = 0.1,timetorun=10)
 {
   #env$params@species_params$R_max[]<-10^vary[1:12]
@@ -53,8 +53,8 @@ getError <- function(vary,params,dat,data_type="catch", tol = 0.1,timetorun=10)
 
   if (data_type=="catch") {
     output <-getYield(sim)[timetorun,]/1e6
-    #' using n . w . dw so g per year per volume (i.e. North Sea since kappa is set up this way).
-    #'The data are in tonnes per year so converting to tonnes.
+    # using n . w . dw so g per year per volume (i.e. North Sea since kappa is set up this way).
+    # The data are in tonnes per year so converting to tonnes.
   }
 
   pred <- log(output)
