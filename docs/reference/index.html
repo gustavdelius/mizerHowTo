@@ -135,7 +135,84 @@
         <td>
           <p><code><a href="Fmat.html">Fmat</a></code> </p>
         </td>
-        <td><p>Something</p></td>
+        <td><p>ICES fisheries mortality</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="FmatWeightedInterpolated.html">FmatWeightedInterpolated</a></code> </p>
+        </td>
+        <td><p>ICES fisheries mortality processed
+On the ICES database, some species have multiple entries and some have none.
+Fisheries mortality is weighted by the species abundance to be able to take into account multiple database entries
+Gurnard data is extrapolated from whiting (same gear and physiology)
+....</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="HTM1_sim.html">HTM1_sim</a></code> </p>
+        </td>
+        <td><p>HTM1 final simulation saved (sim_guessed)
+Used at the beginning of HTM2</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="HTM2_Fmsy1.html">HTM2_Fmsy1</a></code> </p>
+        </td>
+        <td><p>HTM2 Fmsy plot file (step 2 - Fmsy1 plot_dat)
+plotFmsy() runs slowly so saving the result for fast kniting</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="HTM2_Fmsy2.html">HTM2_Fmsy2</a></code> </p>
+        </td>
+        <td><p>HTM2 Fmsy plot file (step 2 - Fmsy2 plot_dat)
+plotFmsy() runs slowly so saving the result for fast knitting</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="HTM2_optimParallel_Rmax1.html">HTM2_optimParallel_Rmax1</a></code> </p>
+        </td>
+        <td><p>HTM2 optim parallel output (step 1 - optim_result)
+The Rmax vector output of optim parallel is saved for fast knitting
+....</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="HTM2_optimParallel_Rmax2.html">HTM2_optimParallel_Rmax2</a></code> </p>
+        </td>
+        <td><p>HTM2 optim parallel output (step 2 - optim_loop)
+The Rmax vector output of optim parallel is saved for fast knitting
+....</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="HTM2_sim_optim1.html">HTM2_sim_optim1</a></code> </p>
+        </td>
+        <td><p>HTM2 saved simulation (step 1 - results)
+Used as checkpoint/kick start if .rmd are not run from the beginning
+....</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="HTM2_sim_optim2.html">HTM2_sim_optim2</a></code> </p>
+        </td>
+        <td><p>HTM2 saved simulation (step 2 - tweaked erepro)
+Used as checkpoint/kick start if .rmd are not run from the beginning
+....</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="HTM2_sim_optim3.html">HTM2_sim_optim3</a></code> </p>
+        </td>
+        <td><p>HTM2 saved simulation (step 2 - sim_loop)
+Used as checkpoint/kick start if .rmd are not run from the beginning
+....</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="catchAvg.html">catchAvg</a></code> </p>
+        </td>
+        <td><p>averaged catch in the North Sea 2014 - 2019</p></td>
       </tr><tr>
         
         <td>
@@ -160,7 +237,7 @@ Contains libraries and functions</p></td>
         <td>
           <p><code><a href="getError.html">getError()</a></code> </p>
         </td>
-        <td><p>Plot ....</p></td>
+        <td><p>compare outputs</p></td>
       </tr><tr>
         
         <td>
@@ -173,6 +250,12 @@ Contains libraries and functions</p></td>
           <p><code><a href="mizerHowTo-package.html">mizerHowTo-package</a></code> </p>
         </td>
         <td><p>mizerHowTo</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="nsParams.html">nsParams</a></code> </p>
+        </td>
+        <td><p>Species specific parameters for the North Sea</p></td>
       </tr><tr>
         
         <td>
@@ -215,6 +298,30 @@ Contains libraries and functions</p></td>
           <p><code><a href="plotSummary.html">plotSummary()</a></code> </p>
         </td>
         <td><p>Plot ....</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="shiny_erepro.html">shiny_erepro()</a></code> </p>
+        </td>
+        <td><p>shiny app to tweak erepro</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="shiny_fmsy.html">shiny_fmsy()</a></code> </p>
+        </td>
+        <td><p>shiny app to tweak erepro per species and see the effects on Fmsy</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="shiny_gamma.html">shiny_gamma()</a></code> </p>
+        </td>
+        <td><p>shiny app to tweak gamma per species and see the effects on growth</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="shiny_kappa.html">shiny_kappa()</a></code> </p>
+        </td>
+        <td><p>shiny app to tweak gamma per species and see the effects on growth</p></td>
       </tr>
     </tbody>
     </table>
