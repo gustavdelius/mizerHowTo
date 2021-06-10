@@ -12,7 +12,7 @@ always_allow_html: true
 
 
 ```{r set up, message = F, echo = F}
-
+library(mizerHowTo)
 sim_guessed <- HTM1_sim
 params_guessed <- sim_guessed@params
 
