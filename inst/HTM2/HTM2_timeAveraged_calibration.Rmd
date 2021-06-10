@@ -12,20 +12,10 @@ always_allow_html: true
 
 
 ```{r set up, message = F, echo = F}
-source("../utility.R")
-# loading HTM1 data
-sim_guessed <- readRDS("../HTM1/HTM1_sim.rds")
+
+sim_guessed <- HTM1_sim
 params_guessed <- sim_guessed@params
 
-# database
-# fisheries mortality F
-fMat <- read.csv("../data/fmat.csv")
-# fMatWeighted <- read.csv("data/fmatWeighted.csv") # Sandeel and Cod have multiple data base so average their F and weighting by SSB
-fMatWeighted <- readRDS("../data/FmatWeightedInterpolated.rds") # to get Gurnard data
-# read in time-averaged  catches  
-catchAvg <-read.csv("../data/time-averaged-catches.csv") # only that one is used at the moment | catches are estimated from fMatW
-# ssb
-ssbAvg <- read.csv("../data/time-averaged-SSB.csv")
 ```
 
 
@@ -76,8 +66,6 @@ getError(vary = vary, params = params_guessed, dat = catchAvg$Catch_1419_tonnes)
 
 Now, carry out the optimisation. There are several optimisation methods to choose from - we need to select the most robust one to share here. The R package `optimParallel` seems to be the most robust general R package and has replaced optim. Often this requires repeating the procedure several times but the advantage of using parallel run is the speed compared to packages such as optimx.
 
-This might take AWHILE. The output is saved as `optimParallel_Rmax.RDS` if you wish to skip this block.
-
 ```{r step 1 - optimisation, message = F, eval=F}
 # create set of params for the optimisation process
 params_optim <- params_guessed
@@ -95,19 +83,19 @@ clusterEvalQ(cl, {
 optim_result <-optimParallel(par=vary,getError,params=params_optim, dat = catchAvg$Catch_1419_tonnes, method   ="L-BFGS-B",lower=c(rep(3,12)),upper= c(rep(15,12)),
                             parallel=list(loginfo=TRUE, forward=TRUE))
 stopCluster(cl)
-saveRDS(optim_result,"optimParallel_Rmax1.RDS")
+# saveRDS(optim_result,"optimParallel_Rmax1.RDS")
 ```
 
 
 ```{r step 1 - results, message=FALSE,warning=FALSE}
-# if previous block was not evaluated
+# if previous block wasn't run, load the saved value
 params_optim <- params_guessed
-optim_result <- readRDS("optimParallel_Rmax1.RDS")
+optim_result <- HTM2_optimParallel_Rmax1
 # optim values:
 params_optim@species_params$R_max <- 10^optim_result$par 
 params_optim <-setParams(params_optim)
-sim_optim <- project(params_optim, effort = 1, t_max = 100, dt=0.1,initial_n = sim_guessed@n[100,,],initial_n_pp = sim_guessed@n_pp[100,])
-saveRDS(sim_optim,"sim_optim1.RDS")
+sim_optim <- project(params_optim, effort = 1, t_max = 100, dt=0.1,initial_n = sim_guessed@n[100,,],initial_n_pp = sim_guessed@n_pp[100,],progress_bar = F)
+# saveRDS(sim_optim,"sim_optim1.RDS")
 plotCalibration(sim_optim,catch_dat = catchAvg$Catch_1419_tonnes )
 ```
 
@@ -126,12 +114,8 @@ In this section you will:
 
 `erepro` represents the energy conversion efficiency between energy allocated to reproduction and the actual spawn. Lowering `erepro` biologically means higher egg mortality rate or wasteful energy invested into gonads. For example, `erepro` is currently set to $0.01$ meaning, that for every one $g$ of mass allocated to reproduction, $0.01g$ will be used as spawn recruitment, the rest is lost. This coefficient is applied before any density-dependence requirement. Let's use Rshiny to see how varying `erepro` influences the ecosystem (to play around).
 
-
-> Rshiny app erepro
-
-
-```{r step 2 rshiny-erepro, eval = F, echo = F}
-runApp("../shiny_erepro")
+```{r step 2 rshiny-erepro, eval = F, echo = T}
+shiny_erepro(input = HTM2_sim_optim1@params)
 ```
 
 
@@ -142,12 +126,12 @@ Let's take a look at the current $F_{msy}$ per species.
 ```{r step 2 - Fmsy | data crunching, eval=F, echo = F}
 # Not evaluated because slow (especially at high effortRes)
 plot_dat <- plotFmsy(params_optim, returnData = T, effortRes = 50)
-saveRDS(plot_dat, "Fmsy1.rds")
+# saveRDS(plot_dat, "Fmsy1.rds")
 ```
 
 
 ```{r step 2 - Fmsy | plots, warning=F, echo = F}
-plot_dat <- readRDS("Fmsy1.rds")
+plot_dat <- HTM2_Fmsy1
 ggplot(plot_dat) +
   geom_line(aes(x = effort , y = yield, color = species))+
   facet_wrap(species~., scales = "free") +
@@ -163,36 +147,36 @@ ggplot(plot_dat) +
 
 Decreasing `erepro` is going to move the $F_{msy}$ towards lower effort. Until now we had the same `erepro` for all species but we can input species-specific values to calibrate our recruitment. To do so, let's use another shiny app again. The next one allows you to change `erepro` one at a time and see the effect on the species' $F_{msy}$
 
-> Rshiny app Fmsy
-> Note: the shiny app only calculate the $F_{msy}$ of one species at a time (for speed reasons) and the final results may not be exactly the same as calculating the $F_{msy}$ for every species together (as shown below)
 
-```{r step 2 - rshiny-fmsy, eval = F, echo = F}
-runApp("../shiny_fmsy")
+
+```{r step 2 - rshiny-fmsy, eval = F, echo = T}
+shiny_fmsy(params = HTM2_sim_optim1@params, dat = HTM2_Fmsy2) 
 ```
+> Note: the shiny app only calculate the $F_{msy}$ of one species at a time (for speed reasons) and the final results may not be exactly the same as calculating the $F_{msy}$ for every species together (as shown below)
 
 Let's see what our system looks like with species-specific `erepro`
 
 ```{r step 2 - Fmsy with tweaked erepro, warning=F}
-sim_optim <- readRDS("sim_optim1.RDS")
+sim_optim <- HTM2_sim_optim1
 params_optim <- sim_optim@params # redundancy if previous blocks were not run 
 params_optim@species_params$erepro <- 10^(c(-1.7,-3.2,-4,-4,-3,-3.5,-3.5,-4.1,-2.7,-3,-2.5,-1.7))
 params_optim2 <- setParams(params_optim)
-sim_optim2 <- project(params_optim2, effort = 1, t_max = 100)
-saveRDS(sim_optim2, file = "sim_optim2.RDS")
+sim_optim2 <- project(params_optim2, effort = 1, t_max = 100, progress_bar = F)
+# saveRDS(sim_optim2, file = "sim_optim2.RDS")
 ```
 
 
 ```{r step 2 - Fmsy plot 2, warning=F, eval = F, echo = F}
 plot_dat <- plotFmsy(params_optim2, effortRes = 50, returnData = T)
-saveRDS(plot_dat, "Fmsy2.rds")
+# saveRDS(plot_dat, "Fmsy2.rds")
 ```
 
 
 ```{r step 2 - Fmsy with tweaked erepro summary, warning=F, echo = F}
-
+sim_optim2 <- HTM2_sim_optim2 # if previous block wasn't run
 plotCalibration(sim_optim2)
 
-plot_dat <- readRDS("Fmsy2.rds")
+plot_dat <- HTM2_Fmsy2
 ggplot(plot_dat) +
   geom_line(aes(x = effort , y = yield, color = species))+
   facet_wrap(species~., scales = "free") +
@@ -215,7 +199,7 @@ Itering the calibration process multiple times can help find better `R_max` valu
 
 ```{r step 2 - looping rmax calibration crunch, message = F, eval=F}
 # looping calibration to get more accurate results
-sim_loop <- readRDS(file = "sim_optim2.RDS")
+sim_loop <- HTM2_sim_optim2
 params_loop <- sim_loop@params
 for(i in 1:5)
 {
@@ -243,25 +227,25 @@ params_loop@species_params$R_max <- 10^optim_loop$par
 # set the param object 
 params_loop <-setParams(params_loop)
 sim_loop <- project(params_loop, effort = 1, t_max = 100, dt=0.1, initial_n = params_loop@initial_n ,
-                      initial_n_pp = params_loop@initial_n_pp)
+                      initial_n_pp = params_loop@initial_n_pp, progress_bar = F)
 }
-saveRDS(optim_loop,"optimParallel_Rmax2.RDS")
+# saveRDS(optim_loop,"optimParallel_Rmax2.RDS")
 
 ```
 
-```{r saving sim, eval = F}
+```{r step 2 - saving sim, eval = F}
 # running sim a bit longer before saving it
-sim_loop <- project(params_loop, effort = 1, t_max = 300)
+sim_loop <- project(params_loop, effort = 1, t_max = 300, progress_bar = F)
 params_loop@initial_n <- sim_loop@n[dim(sim_loop@n)[1],,]
 params_loop@initial_n_pp <- sim_loop@n_pp[dim(sim_loop@n_pp)[1],]
-sim_loop <- project(params_loop, effort = 1)
-saveRDS(sim_loop,"sim_optim3.RDS")
+sim_loop <- project(params_loop, effort = 1, progress_bar = F)
+# saveRDS(sim_loop,"sim_optim3.RDS")
 ```
 
 
-```{r sim loop diag, eval = T, echo = F}
+```{r step 2 - sim loop diag, eval = T, echo = F}
 
-sim_loop <- readRDS("sim_optim3.RDS")
+sim_loop <- HTM2_sim_optim3
 plotCalibration(sim_loop, catch_dat = catchAvg$Catch_1419_tonnes)
 ```
 
@@ -300,10 +284,8 @@ plotDiet2(sim_loop)
 The diets look great as the fish feed on each other and do not rely too much on the background spectrum. We can still reduce the carrying capacity of the background spectrum even more, which could lower the feeding level of the species. Let's do this using the Rshiny app
 
 
-> Rshiny app kappa
-
-```{r step 3 rshiny-kappa, eval = F, echo =F}
-runApp("../shiny_kappa")
+```{r step 3 rshiny-kappa, eval = F, echo =T}
+shiny_kappa(param = HTM2_sim_optim3@params)
 ```
 
 
@@ -314,7 +296,7 @@ params_growth <- sim_loop@params
 # updating param parameters
 params_growth@resource_params$kappa<- 10^11 # value taken from shiny
 params_growth <-setParams(params_growth)
-sim_growth <- project(params_growth, effort = 1, t_max = 100, dt=0.1)
+sim_growth <- project(params_growth, effort = 1, t_max = 100, dt=0.1, progress_bar = F)
 plotGrowthCurves2(sim_growth, species_panel = T)
 plotCalibration(sim_growth)
 
@@ -322,10 +304,9 @@ plotCalibration(sim_growth)
 
 Such values stop species from growing too fast. Now let's help the one growing too slow. The most important part of the curve is at the beginning before species reach maturation size. Slowing down growth will delay maturation and can lead to fluctuation in biomass. The feeding level will be close to critical at small size, creating these fluctuations (species compete to much for food). One will notice that changing the `gamma` of one species will affects other, Sprat and its predators as Sprat is a huge part of the diet of some.
 
-> Rshiny app gamma
 
-```{r step 3 rshiny-gamma, eval = F, echo = F}
-runApp("../shiny_gamma/")
+```{r step 3 rshiny-gamma, eval = F, echo = T}
+shiny_gamma(param = HTM2_sim_optim3@params)
 ```
 
 
@@ -339,7 +320,7 @@ newGamma <- c(1.100000e-10, 6.000000e-11, 9.910525e-11, 7.707098e-11, 2.556902e-
 params_growth <- sim_loop@params
 params_growth@species_params$gamma <- newGamma
 params_growth <- setParams(params_growth)
-sim_growth <- project(params_growth, effort = 1, t_max = 100)
+sim_growth <- project(params_growth, effort = 1, t_max = 100, progress_bar = F)
 
 plotCalibration(sim_growth, catch_dat = catchAvg$Catch_1419_tonnes)
 ```

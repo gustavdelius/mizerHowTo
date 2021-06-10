@@ -11,26 +11,26 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     R (>= 3.5),
-    mizer (>= 2.1.0)
-Imports:
-    mizer,
-    mizerExperimental,
+    mizer (>= 2.1.0),
     ggplot2,
-    dplyr,
-    tibble,
-    shiny,
-    shinyWidgets,
-    optimParallel,
-    ggrepel,
+    viridis,
     cowplot,
     gridExtra,
-    viridis,
+    dplyr,
+    shiny,
+    shinyWidgets
+Imports:
+    mizerExperimental,
+    tibble,
+    optimParallel,
+    ggrepel,
     knitr,
     methods
 Suggests:
     tictoc,
     parallel
 Collate:
+    'shiny_apps.R'
     'utility.R'
     'data.R'
     'mizerHowTo-package.R'

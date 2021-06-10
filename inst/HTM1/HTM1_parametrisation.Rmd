@@ -9,13 +9,6 @@ place: Hobart, Australia
 always_allow_html: yes
 ---
 
-
-```{r set up, message = F,include=FALSE}
-source("../utility.R")
-
-```
-
-
 # Beginner level tutorial - how to parameterise a Mizer model
 
 In this tutorial you will learn 
@@ -31,10 +24,10 @@ In this tutorial you will learn
 
 ## Step 1 - What data are typically needed to parameterise a mizer model?
 
-![Figure 1: Illustration of the parameters needed (green boxes) and calibrated (blue boxes) by Mizer. The need for data is hierarchical: a model can be setup and calibrated with the information in red: knowledge of the asymptotic size and observations of biomass and fishing. The calibration can be refined by adding further information in life history parameters and by using knowledge of Fmsy to calibrate the reproductive efficiency (blue). Additional refinement can be done by specifying the interaction matrix, theta (blue). Other parameters can be adjusted but they are rarely known accurately on a species-by-species basis (black).](../paper/parameterSketch.png)
+![Figure 1: Illustration of the parameters needed (green boxes) and calibrated (blue boxes) by Mizer. The need for data is hierarchical: a model can be setup and calibrated with the information in red: knowledge of the asymptotic size and observations of biomass and fishing. The calibration can be refined by adding further information in life history parameters and by using knowledge of Fmsy to calibrate the reproductive efficiency (blue). Additional refinement can be done by specifying the interaction matrix, theta (blue). Other parameters can be adjusted but they are rarely known accurately on a species-by-species basis (black).](../figures/parameterSketch.png)
 
 
-```{r Parameter description table, echo = F}
+```{r step 1 - Parameter description table, echo = F}
 
 param_descrition <- data.frame("parameter" = c("w_inf","w_mat","beta","sigma","R_max","k_vb","l25","l50",
                                                "a","b","catchability","h","k","ks","z0","gamma","w_mat25","erepro"),
@@ -50,7 +43,7 @@ param_descrition <- data.frame("parameter" = c("w_inf","w_mat","beta","sigma","R
                                                  "weight at which 25% of individuals are mature","reproductive output scalar")
 )
 
-kable(param_descrition, caption = "parameters' description")
+knitr::kable(param_descrition, caption = "parameters' description")
 
 ```
 
@@ -121,10 +114,10 @@ For simplicity, we will assume defaults for all other parameters and that both s
 
 ```{r step 1 - small example}
 smallExample <- data.frame("species" = c("sandeel","cod"),"w_inf" = c(23,24600), "k_vb" = c(0.1,0.2),"beta" = c(10000,100))
-kable(smallExample, caption = "species' parameters")
+knitr::kable(smallExample, caption = "species' parameters")
 
 smallInter <- matrix(c(1,1,1,1),ncol = 2, dimnames = list(smallExample$species,smallExample$species))
-kable(smallInter, caption = "species' interactions")
+knitr::kable(smallInter, caption = "species' interactions")
 
 ```
 
@@ -132,20 +125,13 @@ The `smallExample` shows the format of the data frame for the species parameters
 
 To illustrate this next step we will use pre-existing  set of species' specific parameters for a previously published  North Sea model, that used more detailed fisheries dependent and independent data to calculate species parameters. 
 
-These files are availalble in the "How to Mizer" GitHub repository as shown below.
+These files are pre-loaded in this package.
+More information on how to set this up is here: https://sizespectrum.org/mizer/articles/a_multispecies_model_of_the_north_sea.html
 
 
-```{r step 0 - initial parameters, message= F }
-nsParams <- read.csv("../data/nsparams0.csv")
-inter <- readRDS("../data/interNS.rds")
-# more information on how to set this up is here:
-#https://sizespectrum.org/mizer/articles/a_multispecies_model_of_the_north_sea.html
-```
-
-
-```{r step 0 - tables, echo = F }
-kable(nsParams, caption = "North Sea species' parameters") 
-kable(inter, caption = "North Sea interaction matrix") 
+```{r step 1 - tables, echo = F }
+knitr::kable(nsParams, caption = "North Sea species' parameters") 
+knitr::kable(interNS, caption = "North Sea interaction matrix") 
 ```
 
 
@@ -163,25 +149,9 @@ https://sizespectrum.org/mizer/reference/setFishing.html
 One effort is set during the simulation for each gear in the ecosystem, which is determined by `gear`.
 Finally, catchability is `catchability`.
 
-For the North Sea we assumed $catchability.effort$ could be estimated from the fishing mortality rates of fully selected sizes/ages of fish from single-species stock assessments. The  following .csv are extracted from the ICES stock assessment database using "data/getICESFishdata_param.R". Fishing mortality data is averaged over 2014-2019 as it is a relatively stable period in catches and has the maximum amount of data across all species concerned.
+For the North Sea we assumed $catchability.effort$ could be estimated from the fishing mortality rates of fully selected sizes/ages of fish from single-species stock assessments. 
 
-
-```{r step 1 - loading data}
-
-# fisheries mortality F
-fMat <- read.csv("../data/fmat.csv")
-
-# Sandeel and Cod have multiple data base so average their F and weighting by SSB
-# extrapolating Gurnard data from Dab (similar life history)
-fMatWeighted <- readRDS("../data/FmatWeightedInterpolated.rds") 
-
-# read in time-averaged  catches  
-catchAvg <-read.csv("../data/time-averaged-catches.csv") # catches are estimated from fMatW
-
-# ssb
-ssbAvg <- read.csv("../data/time-averaged-SSB.csv")
-
-```
+`data-raw/DATASET.R` contains the code extracting the data from the ICES stock assessment database in a usable format. Fishing mortality data is averaged over 2014-2019 as it is a relatively stable period in catches and has the maximum amount of data across all species concerned. The `catchAvg` object (loaded with the package) contains the average catch data over 2014-2019 and is used later to compare model output versus empirical data.
 
 
 ## Step 2 - How to convert the data into a valid `mizerParams` object
@@ -206,7 +176,7 @@ Let's do the same for our North Sea data set and look at what parameters we can 
 
 
 ```{r step 2 - mizerParams NS}
-params_uncalibrated <- newMultispeciesParams(nsParams, inter, kappa = 1e11)
+params_uncalibrated <- newMultispeciesParams(nsParams, interNS, kappa = 1e11)
 
 ```
 
@@ -216,20 +186,15 @@ You will note that in the case of the North Sea, we provide another parameter `k
 > ### Background resource spectrum
 > In Mizer, a background resource spectrum is simulated to represent all the food sources that are not explicilty modelled as fish. It is especially useful to feed small-sized fish that are not piscivores. The carrying capacity of the background spectrum is determined by `kappa` and its regeneration rate by `r_pp`. High `kappa` implies more food and therefore faster growth rate and/or higher sustainable fish biomass.
 
-```{r step 2 - mizerParams tweaks NS}
+```{r step 2 - mizerParams tweaks NS, echo = F}
 # small edits to the mizerParam object
-
 params_uncalibrated@species_params$erepro <- .01 # default is 1
 params_uncalibrated@linecolour[1:12] <- viridis(dim(params_uncalibrated@species_params)[1]) # color gradient of asymptotic sizes
-
-#  Add other params for info
-#  param$Volumecubicmetres=5.5e13    #unit of volume. Here total volume of North sea is used (Andersen & Ursin 1977)
-
 ```
 
 
 ```{r step 2 - mizerParams table NS, echo = F}
-kable(params_uncalibrated@species_params[,-which(colnames(params_uncalibrated@species_params) %in% 
+knitr::kable(params_uncalibrated@species_params[,-which(colnames(params_uncalibrated@species_params) %in% 
                                              c("sel_func","gear","interaction_resource","pred_kernel_type","m","alpha","n","p","q",
                                                "w_min","w_mat25","k"))],row.names = F, caption = "mizerParams object")
 
@@ -263,7 +228,7 @@ These plots show that species do not coexist and several go extinct. This is bec
 > $$RDD = R_{max}\frac{RDI}{RDI + R_{max}}$$
 > RDD is the dependent reproduction rate that will determine the recruitement per species in the model.
 
-![Figure 2: Illustration of the interplay between the reproductive output and the external density dependence. The model simulates a size spectrum of each species (right). From that spectrum it calculates the reproductive output (blue arrow). The reproductive output is reduced by imposing an external density dependence in the form of a stock recruitment relationship (left panel; orange line). The recruitment then determines the flow of new recruits into the size spectrum. The simulation continues until the size spectrum reaches an equilibrium (which may be a dynamic equilibrium). Changing Rmax up or down by a factor results in a change up or down of the spectrum by the same factor. Rmax therefore functions as the central parameter that adjusts the total biomass of a species.](../paper/Rmax.png)
+![Figure 2: Illustration of the interplay between the reproductive output and the external density dependence. The model simulates a size spectrum of each species (right). From that spectrum it calculates the reproductive output (blue arrow). The reproductive output is reduced by imposing an external density dependence in the form of a stock recruitment relationship (left panel; orange line). The recruitment then determines the flow of new recruits into the size spectrum. The simulation continues until the size spectrum reaches an equilibrium (which may be a dynamic equilibrium). Changing Rmax up or down by a factor results in a change up or down of the spectrum by the same factor. Rmax therefore functions as the central parameter that adjusts the total biomass of a species.](../figures/Rmax.png)
 
 To get coexistence one needs to guess reasonable $R_{max}$ values which will stop out-competition from a few species. We assume that a the density dependence is going to be posively related to body size, meaning that large individuals will have a stronger density-dependence applied to them (and therefore a lower $R_{max}$ value). Let's start again and set some guessed `R_max` values.
 
@@ -275,7 +240,7 @@ params_guessed@species_params$R_max <- params_guessed@resource_params$kappa*para
 
 params_guessed <- setParams(params_guessed) # checking if we still have a workable mizerParams object
 sim_guessed <- project(params_guessed, effort =1)
-saveRDS(sim_guessed, "HTM1_sim.rds")
+# saveRDS(sim_guessed, "../../data-raw/HTM1_sim.rds")
 plotCalibration(sim_guessed)
 
 ```
@@ -285,7 +250,7 @@ The ecosystem looks way better. Saithe's largest individuals are having a hard t
 $R_{max}$ affects the density-dependent reproduction rate ($RDD$) by limiting the maximum amout of spawn calculated from the density-independent reproduction rate ($RDI$). Let's look at the $RDI/RDD$ ratio to see how strong $R_{max}$ acts on our different species.
 
 
-```{r step 3 - RDD/RDI}
+```{r step 3 - RDD/RDI, echo = F}
 plot_dat <- as.data.frame(getRDI(sim_guessed@params)/getRDD(sim_guessed@params))
 plot_dat$species <- factor(rownames(plot_dat),sim_guessed@params@species_params$species)
 colnames(plot_dat)[1] <- "ratio"
@@ -293,7 +258,7 @@ plot_dat$w_inf <- sim_guessed@params@species_params$w_inf
 
 ggplot(plot_dat)+
    geom_point(aes(x = w_inf, y = ratio, color = species), size = 6, alpha = .8) +
-   geom_text_repel(aes(x = w_inf, y = ratio, label = species), hjust = 0, nudge_x = 0.05)+
+   ggrepel::geom_text_repel(aes(x = w_inf, y = ratio, label = species), hjust = 0, nudge_x = 0.05)+
    scale_y_continuous(name = "Density-independent / density-dependent reproduction rate", trans = "log10") +
    scale_x_continuous(name = "Asymptotic size (g)", trans = "log10") +
    scale_colour_manual(values = sim_guessed@params@linecolour) +
@@ -319,11 +284,11 @@ Let's go through an example we have made previously to provide some tips of what
 
 The figure below shows an example of a calibrated ecosystem.
 
-![Figure 3: summary diagnostic](../paper/tempSummaryAnnoted.png)
+![Figure 3: summary diagnostic](../figures/tempSummaryAnnoted.png)
 
 Let's compare it to our own little ecosystem
 
-```{r warning= F}
+```{r warning= F, echo = F}
 
 plotCalibration(sim_guessed)
 

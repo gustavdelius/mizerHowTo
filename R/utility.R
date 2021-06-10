@@ -9,7 +9,55 @@ g_legend<-function(a.gplot){
   legend <- tmp$grobs[[leg]]
   return(legend)}
 
-# arrow to show asymptotic size
+
+#' compare outputs
+#' @export
+#' @examples yo
+getError <- function(vary,params,dat,data_type="catch", tol = 0.1,timetorun=10)
+{
+  #env$params@species_params$R_max[]<-10^vary[1:12]
+  params@species_params$R_max[]<-10^vary[1:12]
+
+  params <- setParams(params)
+  # run to steady state and update params
+  # env$params<- projectToSteady(env$params, distance_func = distanceSSLogN,
+  #                 tol = tol, t_max = 200,return_sim = F)
+  params<- projectToSteady(params, distance_func = distanceSSLogN,
+                           tol = tol, t_max = 200,return_sim = F)
+
+  # create sim object
+
+  sim <- project(params, effort = 1, t_max = timetorun, progress_bar = F) #Change t_max to determine how many years the model runs for
+
+  #
+  # sim <- project(env$params, effort = 1, t_max = timetorun) #Change t_max to determine how many years the model runs for
+  #
+  # env$params <-sim@params
+  #
+
+  ## what kind of data and output do we have?
+  if (data_type=="SSB") {
+    output <-getSSB(sim)[timetorun,]   #could change to getBiomass if using survey, also check units.
+  }
+
+  if (data_type=="catch") {
+    output <-getYield(sim)[timetorun,]/1e6
+    #' using n . w . dw so g per year per volume (i.e. North Sea since kappa is set up this way).
+    #'The data are in tonnes per year so converting to tonnes.
+  }
+
+  pred <- log(output)
+  dat  <- log(dat)
+  # sum of squared errors, here on log-scale of predictions and data (could change this or use other error or likelihood options)
+  discrep <- pred - dat
+  discrep <- (sum(discrep^2))
+
+  # can use a strong penalty on the error to ensure we reach a minimum of 10% of the data (biomass or catch) for each species
+  # if(any(pred < 0.1*dat)) discrep <- discrep + 1e10
+
+  return(discrep)
+}
+
 
 #' Plot ....
 #'
@@ -953,54 +1001,5 @@ plotFeedingLevel2 <- function (object, species = NULL, time_range, highlight = N
   else return(p)
 }
 
-## the following getError function combines the steps of the optimisastion above - this time with the multispecies model and output the predicted size spectrum
-## update below with project_steady and saving the state from each iteration
-#RF the function takes a bunch of RMax and compare the theoretical catches versus data
 
-#' Plot ....
-#'
-#' @export
-getError <- function(vary,params,dat,env=state,data_type="catch", tol = 0.1,timetorun=10) {
 
-  #env$params@species_params$R_max[]<-10^vary[1:12]
-  params@species_params$R_max[]<-10^vary[1:12]
-
-  params <- setParams(params)
-  # run to steady state and update params
-  # env$params<- projectToSteady(env$params, distance_func = distanceSSLogN,
-  #                 tol = tol, t_max = 200,return_sim = F)
-  params<- projectToSteady(params, distance_func = distanceSSLogN,
-                           tol = tol, t_max = 200,return_sim = F)
-
-  # create sim object
-
-  sim <- project(params, effort = 1, t_max = timetorun) #Change t_max to determine how many years the model runs for
-
-  #
-  # sim <- project(env$params, effort = 1, t_max = timetorun) #Change t_max to determine how many years the model runs for
-  #
-  # env$params <-sim@params
-  #
-
-  ## what kind of data and output do we have?
-  if (data_type=="SSB") {
-    output <-getSSB(sim)[timetorun,]   #could change to getBiomass if using survey, also check units.
-  }
-
-  if (data_type=="catch") {
-    output <-getYield(sim)[timetorun,]/1e6
-    #' using n . w . dw so g per year per volume (i.e. North Sea since kappa is set up this way).
-    #'The data are in tonnes per year so converting to tonnes.
-  }
-
-  pred <- log(output)
-  dat  <- log(dat)
-  # sum of squared errors, here on log-scale of predictions and data (could change this or use other error or likelihood options)
-  discrep <- pred - dat
-  discrep <- (sum(discrep^2))
-
-  # can use a strong penalty on the error to ensure we reach a minimum of 10% of the data (biomass or catch) for each species
-  # if(any(pred < 0.1*dat)) discrep <- discrep + 1e10
-
-  return(discrep)
-}
