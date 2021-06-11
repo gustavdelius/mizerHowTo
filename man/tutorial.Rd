@@ -2,15 +2,18 @@
 % Please edit documentation in R/utility.R
 \name{tutorial}
 \alias{tutorial}
-\title{file that should be sourced at the beginning of every .Rmd
-Contains libraries and functions}
+\title{Open tutorials}
 \usage{
-tutorial()
+tutorial(tutorial_name = "HTM1", extension = "html")
+}
+\arguments{
+\item{tutorial_name}{The name of the tutorial. Accepted values are "HTM1"
+and "HTM2". Default is "HTM1".}
+
+\item{extension}{The extension of the tutorial. Accepted values are "html"
+and "Rmd". Default is "html".}
 }
 \description{
-Open tutorials
-}
-\details{
-Opens the rmarkdown file of a tutorial in RStudio so that the user can
+Opens the file of a tutorial in RStudio so that the user can read it or
 play with the code.
 }
