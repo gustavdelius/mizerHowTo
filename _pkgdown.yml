@@ -1,0 +1,7 @@
+# This is the configuration for the mizerHowTo website using the pkgdown package.
+
+url: https://sizespectrum.org/mizerHowTo
+
+template:
+  params:
+    bootswatch: cerulean

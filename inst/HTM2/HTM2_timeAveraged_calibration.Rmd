@@ -1,6 +1,6 @@
 ---
 title: "How to Mizer - how to calibrate/refine a mizer model to time-averaged catch data"
-author: "Julia L. Blanchard, Ken H. Andersen, Gustav Delius, Romain Forestier"
+author: "Julia L. Blanchard, Ken H. Andersen, Romain Forestier"
 date: "`r Sys.Date()`"
 place: Hobart, Australia
 output:
@@ -53,7 +53,7 @@ In this section you will:
 
 `R_max` affects the relative biomass of each species (and, combined with the fishing parameters, the catches). We are going to change with the aim of minimising the error between observed and estimated catches or biomasses. Both `erepro` and `kappa` affect the relative biomass of each species and can be used (as in Blanchard et al. 2014 & Spence et al. 2016) but for now we are going to keep them at default value and focus on `R_max` only.
 
-First let's set up a function running the model and outputing the difference between predicted catches (`getYield()`) and actual catches (`catchAvg`). `getError()` outputs the sum of squared errors between the two.
+First let's set up a function running the model and outputting the difference between predicted catches (`getYield()`) and actual catches (`catchAvg`). `getError()` outputs the sum of squared errors between the two.
 
 ```{r step 1 - getError | result}
 # we need 12 Rmaxs, log10 scale
@@ -119,7 +119,7 @@ shiny_erepro(input = HTM2_sim_optim1@params)
 ```
 
 
-A good indicator of realistic `erepro` value is the shape of the fishing mortality rate versus yield curve. Such graph allows to determine the fisheries maximum sustainbale yield when harvesting a species and is supposed to have a bell shape. Too high fishing mortality depletes the stock and reduce the yield whereas too low fishing mortality simply means low yield. The $F_{msy}$ sits in the middle, at the top of the bell. If a species is too reproduction efficient and can replenish its biomass even under high fisheries mortality, its `erepro` is too high. Conversely, if a low fisheries mortality depletes the stock right away, the species' `erepro` is too low.
+A good indicator of realistic `erepro` value is the shape of the fishing mortality rate versus yield curve. Such graph allows to determine the fisheries maximum sustainable yield when harvesting a species and is supposed to have a bell shape. Too high fishing mortality depletes the stock and reduce the yield whereas too low fishing mortality simply means low yield. The $F_{msy}$ sits in the middle, at the top of the bell. If a species is too reproduction efficient and can replenish its biomass even under high fisheries mortality, its `erepro` is too high. Conversely, if a low fisheries mortality depletes the stock right away, the species' `erepro` is too low.
 
 Let's take a look at the current $F_{msy}$ per species. 
 
@@ -195,7 +195,7 @@ Some trade-offs here, relatively high `erepro` allows Sprat to coexist with the 
 
 Before spending more tome hand tweaking these species, we are going to run the `R_max` calibration again to see if we improved the yield match (as in step 1).
 
-Itering the calibration process multiple times can help find better `R_max` values as the first run of `optimParallel` may not find the best combination of `R_max` in the first go. Below it an example of `optimParallel` being looped five times with 
+Iterating the calibration process multiple times can help find better `R_max` values as the first run of `optimParallel` may not find the best combination of `R_max` in the first go. Below it an example of `optimParallel` being looped five times with 
 
 ```{r step 2 - looping rmax calibration crunch, message = F, eval=F}
 # looping calibration to get more accurate results
@@ -267,7 +267,7 @@ In this section you will:
 plotGrowthCurves2(sim_loop, species_panel = T)
 ```
 
-Most species have a growth curve similar to the expected von Bertalanffy growth curve, apart from Spart and Sandeel which have much slower growth than expected. `kappa`, which is the carrying capacity of the background spectrum will affect the food availability and therefore the growth rate (more food means faster growth). However, changing `kappa` will affect all growth curves. If only a few species are off, we need to change the `gamma` parameter (search volume) per species.
+Most species have a growth curve similar to the expected von Bertalanffy growth curve, apart from Sprat and Sandeel which have much slower growth than expected. `kappa`, which is the carrying capacity of the background spectrum will affect the food availability and therefore the growth rate (more food means faster growth). However, changing `kappa` will affect all growth curves. If only a few species are off, we need to change the `gamma` parameter (search volume) per species.
 
 
 
@@ -333,7 +333,7 @@ plotGrowthCurves2(sim_growth, species_panel = T)
 plotFeedingLevel2(sim_growth, include_critical = T)
 ```
 
-Growth curves haven't change much but the feeding level has decreased at small size (even if we theoretically increase the feeding of the small species, maybe they are now too good competitor for the other species and steal their food)
+Growth curves haven't changed much but the feeding level has decreased at small size (even if we theoretically increase the feeding of the small species, maybe they are now too good competitor for the other species and steal their food)
 
 ```{r step 3 diets, warning=F, echo = F}
 plotDiet2(sim_growth)

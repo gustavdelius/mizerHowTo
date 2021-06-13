@@ -1,19 +1,38 @@
-#' file that should be sourced at the beginning of every .Rmd
-#' Contains libraries and functions
-#'
-
 #' Open tutorials
 #'
-#' Opens the rmarkdown file of a tutorial in RStudio so that the user can
+#' Opens the file of a tutorial in RStudio so that the user can read it or
 #' play with the code.
 #'
+#' @param tutorial_name The name of the tutorial. Accepted values are "HTM1"
+#' and "HTM2". Default is "HTM1".
+#' @param extension The extension of the tutorial. Accepted values are "html"
+#' and "Rmd". Default is "html".
 #' @export
-tutorial <- function() {
-  rstudioapi::navigateToFile(
-    system.file("HTM1", "HTM1_parametrisation.Rmd",
-                package = "mizerHowTo"))
+tutorial <- function(tutorial_name = "HTM1", extension = "html") {
+  switch (tutorial_name,
+          "HTM1" = {
+            if(extension == "Rmd")
+            {
+              rstudioapi::navigateToFile(
+                system.file("HTM1", "HTM1_parametrisation.Rmd",
+                            package = "mizerHowTo"))
+            } else if (extension == "html") browseURL(system.file("HTM1", "HTM1_parametrisation.html",
+                                                                  package = "mizerHowTo"))
+          },
+          "HTM2" = {
+            if(extension == "Rmd")
+            {
+              rstudioapi::navigateToFile(
+                system.file("HTM2", "HTM2_timeAveraged_calibration.Rmd",
+                            package = "mizerHowTo"))
+            } else if (extension == "html") browseURL(system.file("HTM2", "HTM2_timeAveraged_calibration.html",
+                                                                  package = "mizerHowTo"))
+          },
+          {print("Something went wrong")}
+  )
 }
 
+# extract legend from ggplot object to use it in grid plots
 g_legend<-function(a.gplot){
   tmp <- ggplot_gtable(ggplot_build(a.gplot))
   leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
@@ -50,11 +69,8 @@ getError <- function(vary,params,dat,data_type="catch", tol = 0.1,timetorun=10)
   if (data_type=="SSB") {
     output <-getSSB(sim)[timetorun,]   #could change to getBiomass if using survey, also check units.
   }
-
   if (data_type=="catch") {
     output <-getYield(sim)[timetorun,]/1e6
-    # using n . w . dw so g per year per volume (i.e. North Sea since kappa is set up this way).
-    # The data are in tonnes per year so converting to tonnes.
   }
 
   pred <- log(output)

@@ -9,8 +9,3 @@ getError(vary, params, dat, data_type = "catch", tol = 0.1, timetorun = 10)
 \description{
 compare outputs
 }
-\examples{
-yo
-using n . w . dw so g per year per volume (i.e. North Sea since kappa is set up this way).
-The data are in tonnes per year so converting to tonnes.
-}
