@@ -69,7 +69,7 @@ First you are going to need a data frame of species specific parameters to input
 > ### Von Bertalanffy Growth Function
 > The growth curve of a fish is commonly reported as a von Bertalanffy growth curve. The von Bertalanffy curve describes the length of a fish as a function of two parameters; the asymptotic length $L_\infty$ and the von Bertalanffy growth coefficient $K$ (`k_vb` in Mizer): 
 $$ L_{(t)} = L_\infty (1-e^{-Kt}) $$
-where $t$ is the age. $L_\infty$ represents the asymptotic length and $1/K$ is approximately the age at maturation. Mizer, however, uses two two other parameters, $W_\infty$ and $h$ (`w_inf` in Mizer), where $W_\infty$ represents the asymptotic weight and $h$ the size-scale maximum consumption rate. Fortunately, the two sets of parameters are related, and one can derive $h$ and $W_\infty$ from von Bertalanffy $K$ and $L_\infty$. 
+where $t$ is the age. $L_\infty$ represents the asymptotic length and $1/K$ is approximately the age at maturation. Mizer, however, uses two other parameters, $W_\infty$ (`w_inf` in Mizer) and $h$, where $W_\infty$ represents the asymptotic weight and $h$ the size-scale maximum consumption rate. Fortunately, the two sets of parameters are related, and one can derive $h$ and $W_\infty$ from von Bertalanffy $K$ and $L_\infty$. 
 
 >The parameter $h$ represents the maximum consumption rate of a fish, scaled by size. If we assume that stomach fullness (the feeding level) is that same for fish of all sizes, then $h$ is related to the coefficient of the initial growth rate $A$ (blue slanted dashed line) as $h$ approx. $4A$. The value of $h$ varies between $4-400$, with a geometric mean around $22 g^{-0.25}/year$ across all fish species (Andersen 2019, chap. 2 and 11). A more precise estimate can be obtained from von Bertalanffy $K$ and $L_\infty$ as: $h$ approx. $4.75K.L_\infty^{0.75}$ (with $K$ given in $1/years$ and $L_\infty$ in $cm$).
 
@@ -293,7 +293,7 @@ In this section you will:
 
 Let's go through an example we have made previously to provide some tips of what to look for once you run the model.
 
-The figure below shows an example of a calibrated ecosystem.
+The figure below shows an example of a calibrated ecosystem. It is obtained from `plotSummary()`.
 
 ![Figure 3: summary diagnostic](../figures/tempSummaryAnnoted.png)
 
