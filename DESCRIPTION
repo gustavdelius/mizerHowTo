@@ -44,6 +44,8 @@ Collate:
     'utility.R'
     'data.R'
     'mizerHowTo-package.R'
+Remotes:  
+    sizespectrum/mizerExperimental
 RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 URL: https://sizespectrum/mizerHowTo
