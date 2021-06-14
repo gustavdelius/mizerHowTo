@@ -5,7 +5,7 @@
 \alias{Fmat}
 \title{ICES fisheries mortality}
 \format{
-An object of class \code{matrix} (inherits from \code{array}) with 12 rows and 55 columns.
+An object of class \code{matrix} with 12 rows and 55 columns.
 }
 \usage{
 Fmat

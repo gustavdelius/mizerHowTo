@@ -11,7 +11,7 @@ getDietComp(sim)
 }
 \value{
 An array (predator species x predator size x
-   (prey species + resource) x prey size)
+(prey species + resource) x prey size)
 }
 \description{
 The diet \eqn{D_{ij}(w, w_p)} is the prey biomass density rate for a predator of
@@ -34,5 +34,5 @@ obtained by integrating over prey sizes:
 \deqn{
 D_{ij}(w) = \int D_{ij}(w, w_p) dw_p.
 }
-This aggregated diet can also be obtained directly from the `getDiet()` function.
+This aggregated diet can also be obtained directly from the \code{getDiet()} function.
 }

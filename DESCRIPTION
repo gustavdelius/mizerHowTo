@@ -1,39 +1,54 @@
 Package: mizerHowTo
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Tutorials on how to calibrate and use mizer models
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Maintainer: Romain Forestier <romain.forestier@utas.edu.au>
+Authors@R: c(person("Julia", "Blanchard", email="julia.blanchard@utas.edu.au",
+                    role=c("aut", "cph"),
+                    comment = c(ORCID = "0000-0003-0532-4824")),
+             person("Ken", "Andersen", email="kha@aqua.dtu.dk",
+                    role=c("aut", "cph"),
+                    comment = c(ORCID = "0000-0002-8478-3430")),
+             person("Romain", "Forestier", email="romain.forestier@utas.edu.au",
+                    role=c("cre", "aut", "cph")),
+             person("Gustav", "Delius", email="gustav.delius@york.ac.uk",
+                    role=c("aut", "cph"),
+                    comment = c(ORCID = "0000-0003-4092-8228")))
+Description: Provides two tutorials presented to the SPECTRE group in June 2021.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Depends:
     R (>= 3.5),
     mizer (>= 2.1.0),
     ggplot2,
-    viridis,
-    cowplot,
-    gridExtra,
-    dplyr,
-    shiny,
-    shinyWidgets
+    dplyr
 Imports:
     mizerExperimental,
     tibble,
     optimParallel,
     ggrepel,
     knitr,
-    methods
+    methods,
+    cowplot,
+    viridis,
+    shiny,
+    shinyWidgets,
+    rstudioapi
 Suggests:
     tictoc,
-    parallel
+    parallel,
+    rmarkdown
 Collate:
     'shiny_apps.R'
     'utility.R'
     'data.R'
     'mizerHowTo-package.R'
+Remotes:  
+    sizespectrum/mizerExperimental
 RoxygenNote: 7.1.1
-URL: https://github.com/gustavdelius/mizerHowTo
-BugReports: https://github.com/gustavdelius/mizerHowTo/issues
+Roxygen: list(markdown = TRUE)
+URL: https://sizespectrum/mizerHowTo
+BugReports: https://github.com/sizespectrum/mizerHowTo/issues
+Language: en-GB
+VignetteBuilder: knitr

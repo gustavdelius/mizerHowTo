@@ -11,8 +11,19 @@
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/gustavdelius/mizerHowTo}
-  \item Report bugs at \url{https://github.com/gustavdelius/mizerHowTo/issues}
+  \item \url{https://sizespectrum/mizerHowTo}
+  \item Report bugs at \url{https://github.com/sizespectrum/mizerHowTo/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Romain Forestier \email{romain.forestier@utas.edu.au} [copyright holder]
+
+Authors:
+\itemize{
+  \item Julia Blanchard \email{julia.blanchard@utas.edu.au} (\href{https://orcid.org/0000-0003-0532-4824}{ORCID}) [copyright holder]
+  \item Ken Andersen \email{kha@aqua.dtu.dk} (\href{https://orcid.org/0000-0002-8478-3430}{ORCID}) [copyright holder]
+  \item Gustav Delius \email{gustav.delius@york.ac.uk} (\href{https://orcid.org/0000-0003-4092-8228}{ORCID}) [copyright holder]
 }
 
 }
