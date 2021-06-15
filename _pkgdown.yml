@@ -5,3 +5,36 @@ url: https://sizespectrum.org/mizerHowTo
 template:
   params:
     bootswatch: cerulean
+
+navbar:
+  components:
+    articles:
+     text: Tutorials
+     menu:
+     - text: How to parametrise a Mizer model
+       href: articles/HTM1_parametrisation.html
+     - text: How to calibrate/refine a mizer model to time-averaged catch data
+       href: articles/HTM2_timeAveraged_calibration.html
+
+reference:
+- title: Tutorials
+  contents:
+  - tutorial
+- title: New plotting functions
+  contents:
+  - starts_with("plot")
+- title: Other functions
+  contents:
+  - getError
+  - getDietComp
+  - getBiomassFrame2
+- title: Data
+  contents:
+  - nsParams
+  - interNS
+  - catchAvg
+  - starts_with("Fmat")
+  - starts_with("HTM")
+- title: Shiny apps
+  contents:
+  - starts_with("shiny")

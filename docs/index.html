@@ -5,15 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What the Package Does (Title Case) • mizerHowTo</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<title>Tutorials on how to calibrate and use mizer models • mizerHowTo</title>
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cerulean/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="What the Package Does (Title Case)">
-<meta property="og:description" content="More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.">
+<script src="pkgdown.js"></script><meta property="og:title" content="Tutorials on how to calibrate and use mizer models">
+<meta property="og:description" content="Provides two tutorials presented to the SPECTRE group in June 2021.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -47,10 +46,25 @@
 <li>
   <a href="reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Tutorials
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="articles/HTM1_parametrisation.html">How to parametrise a Mizer model</a>
+    </li>
+    <li>
+      <a href="articles/HTM2_timeAveraged_calibration.html">How to calibrate/refine a mizer model to time-averaged catch data</a>
+    </li>
+  </ul>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/gustavdelius/mizerHowTo/">
+  <a href="https://github.com/sizespectrum/mizerHowTo/">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -67,30 +81,52 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+<div id="mizerhowto" class="section level1">
+<div class="page-header"><h1 class="hasAnchor">
+<a href="#mizerhowto" class="anchor"></a>mizerHowTo</h1></div>
+<p>This package contains several tutorials aiming to learn how to handle mizer models and to be able to calibrate mizer models with empirical data.</p>
+<p>How to install:</p>
+<p>The <code>devtools</code> package is needed to install packages hosted on GitHub.</p>
+<p>Use <code><a href="https://rdrr.io/r/utils/install.packages.html">install.packages("devtools")</a></code> if necessary</p>
+<p>Then <code><a href="https://devtools.r-lib.org//reference/remote-reexports.html">devtools::install_github("sizespectrum/mizerHowTo")</a></code></p>
+<p>Finally, load the newly installed package with</p>
+<p><code><a href="https://sizespectrum/mizerHowTo">library(mizerHowTo)</a></code></p>
+<p>To display any tutorial, use the <code><a href="reference/tutorial.html">tutorial()</a></code> function.</p>
+<p>Available tutorials are</p>
+<ul>
+<li><p>HTM1: How to parametrise a Mizer model</p></li>
+<li><p>HTM2: How to calibrate a Mizer model using averaged data over time</p></li>
+</ul>
+<p>Examples:</p>
+<p><code><a href="reference/tutorial.html">tutorial("HTM1","html")</a></code> will display the online version of the first tutorial.</p>
+<p><code><a href="reference/tutorial.html">tutorial("HTM2","Rmd")</a></code> will display the code of the second tutorial.</p>
+<p>Several shiny apps (R code with user interface) are embedded in the tutorials. One can start them from the Rmarkdown files (.Rmd) by running the appropriate chunk of code. All shiny apps functions follows this expression <code>shiny_XXX()</code>.</p>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
 <h2>Links</h2>
 <ul class="list-unstyled">
-<li>Browse source code at <br><a href="https://github.com/gustavdelius/mizerHowTo/">https://​github.com/​gustavdelius/​mizerHowTo/​</a>
+<li>Browse source code at <br><a href="https://github.com/sizespectrum/mizerHowTo/">https://​github.com/​sizespectrum/​mizerHowTo/​</a>
 </li>
-<li>Report a bug at <br><a href="https://github.com/gustavdelius/mizerHowTo/issues">https://​github.com/​gustavdelius/​mizerHowTo/​issues</a>
+<li>Report a bug at <br><a href="https://github.com/sizespectrum/mizerHowTo/issues">https://​github.com/​sizespectrum/​mizerHowTo/​issues</a>
 </li>
 </ul>
 </div>
 <div class="license">
 <h2>License</h2>
 <ul class="list-unstyled">
-<li>What license is it under?</li>
+<li><a href="https://www.r-project.org/Licenses/GPL-3">GPL-3</a></li>
 </ul>
 </div>
 <div class="developers">
 <h2>Developers</h2>
 <ul class="list-unstyled">
-<li>The package maintainer <br><small class="roles"> Maintainer </small>  </li>
+<li>Julia Blanchard <br><small class="roles"> Author, copyright holder </small> <a href="https://orcid.org/0000-0003-0532-4824" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Ken Andersen <br><small class="roles"> Author, copyright holder </small> <a href="https://orcid.org/0000-0002-8478-3430" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Romain Forestier <br><small class="roles"> Maintainer, author, copyright holder </small>  </li>
+<li>Gustav Delius <br><small class="roles"> Author, copyright holder </small> <a href="https://orcid.org/0000-0003-4092-8228" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 
@@ -99,7 +135,7 @@ More about what it does (maybe more than one line)
 
 
       <footer><div class="copyright">
-  <p>Developed by The package maintainer.</p>
+  <p>Developed by Julia Blanchard, Ken Andersen, Romain Forestier, Gustav Delius.</p>
 </div>
 
 <div class="pkgdown">
