@@ -49,7 +49,7 @@ shiny_erepro <- function(input) {
 shiny_fmsy <- function(params,dat) {
 
 
-params_shiny <- sim_optim@params
+params_shiny <- params
 FmsyDat <- dat
 
 ui=fluidPage(
