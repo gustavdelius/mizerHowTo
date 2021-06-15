@@ -301,6 +301,6 @@ Let's compare it to our own little ecosystem
 
 ```{r warning= F, echo = F}
 
-plotCalibration(sim_guessed)
+plotSummary(sim_guessed)
 
 ```
