@@ -268,7 +268,7 @@ plotCalibration(sim_uncalibrated, stage = 1)
 
 The top panel shows the different species size spectrum at the last time step of the simulation while the bottom panel shows the abundance per species through time.
 
-These plots show that species do not coexist and several go extinct. This is because there was no external density dependence (`R_max` is set at $Inf$) and the largest species (Cod and Saithe) are out-competing the rest.
+These plots show that species do not coexist and several go extinct. This is because there was no external density dependence (`R_max` is set at `Inf`) and the largest species (Cod and Saithe) are out-competing the rest.
 
 >### Stock recruitment relationship
 > In Mizer, density dependence is modelled as a stock-recruitment relationship (SRR). The default is such that the recruitment approaches a maximum as the independendent reproduction rate (RDI) increases (similar to a Holling type II function response).
@@ -285,13 +285,11 @@ To get coexistence one needs to guess reasonable $R_{max}$ values which will sto
 ```{r step 3 - guessing coexistence, warning=F, message=F}
 params_guessed <- params_uncalibrated
 # penalise the large species with higher density dependence
-params_guessed@species_params$R_max <- params_guessed@resource_params$kappa*params_guessed@species_params$w_inf^-1
+species_params(params_guessed)$R_max <- resource_params(params_guessed)$kappa * species_params(params_guessed)$w_inf^-1
 
-params_guessed <- setParams(params_guessed) # checking if we still have a workable mizerParams object
 sim_guessed <- project(params_guessed)
 # saveRDS(sim_guessed, "../../data-raw/HTM1_sim.rds")
 plotCalibration(sim_guessed)
-
 ```
 
 The ecosystem looks way better. Saithe's largest individuals are having a hard time, but at least species coexist.
@@ -341,8 +339,6 @@ The figure below shows an example of a calibrated ecosystem. It is obtained from
 
 Let's compare it to our own little ecosystem
 
-```{r warning= F, echo = F}
-
+```{r warning= F}
 plotSummary(sim_guessed)
-
 ```
