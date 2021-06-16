@@ -4,7 +4,7 @@
 \alias{shiny_gamma}
 \title{shiny app to tweak gamma per species and see the effects on growth}
 \usage{
-shiny_gamma(params)
+shiny_gamma(params, dat = NULL)
 }
 \description{
 shiny app to tweak gamma per species and see the effects on growth

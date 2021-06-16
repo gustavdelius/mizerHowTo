@@ -1,7 +1,7 @@
 #' mizerHowTo
 #'
 #' ...
-#' @import ggplot2 mizer dplyr
+#' @import ggplot2 mizer dplyr parallel optimParallel shiny shinyWidgets
 #' @importFrom cowplot plot_grid
 #' @importFrom tibble tibble
 #' @importFrom methods is
