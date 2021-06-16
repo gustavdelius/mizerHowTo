@@ -138,7 +138,7 @@ More information on how to set this up is here: https://sizespectrum.org/mizer/a
 
 
 ```{r step 1 - tables, echo = F }
-knitr::kable(nsParams, caption = "North Sea species' parameters") 
+knitr::kable(nsParams[,-c(14,15,16)], caption = "North Sea species' parameters") 
 knitr::kable(interNS, caption = "North Sea interaction matrix") 
 ```
 
@@ -184,10 +184,12 @@ Let's do the same for our North Sea data set and look at what parameters we can 
 
 
 ```{r step 2 - mizerParams NS}
-params_uncalibrated <- newMultispeciesParams(nsParams, interNS, kappa = 1e11)
+params_uncalibrated <- newMultispeciesParams(nsParams, interNS, kappa = 1e11,
+                                             initial_effort = 1)
 
 ```
 
+We set `initial_effort = 1` as we have already set the `catchability` column of the species data frame to the estimated fishing mortality, and in mizer the fishing mortality of fully selected fish is the product of catchability and effort.
 
 You will note that in the case of the North Sea, we provide another parameter `kappa`. `kappa` sets the carrying capacity of the ecosystem and is set to reflect the entire volume of the North Sea - hence the very large `kappa` value.
 
@@ -195,33 +197,74 @@ You will note that in the case of the North Sea, we provide another parameter `k
 > In Mizer, a background resource spectrum is simulated to represent all the food sources that are not explicilty modelled as fish. It is especially useful to feed small-sized fish that are not piscivores. The carrying capacity of the background spectrum is determined by `kappa` and its regeneration rate by `r_pp`. High `kappa` implies more food and therefore faster growth rate and/or higher sustainable fish biomass.
 
 ```{r step 2 - mizerParams tweaks NS, echo = F}
-# small edits to the mizerParam object
-species_params(params_uncalibrated)$erepro <- .01 # default is 1
+# small edits to the mizerParam object to change the colours used in plots.
 params_uncalibrated@linecolour[1:12] <- viridis::viridis(dim(params_uncalibrated@species_params)[1]) # color gradient of asymptotic sizes
-
 ```
 
 
 ```{r step 2 - mizerParams table NS, echo = F}
 knitr::kable(params_uncalibrated@species_params[,-which(colnames(params_uncalibrated@species_params) %in% 
                                              c("sel_func","gear","interaction_resource","pred_kernel_type","m","alpha","n","p","q",
-                                               "w_min","w_mat25","k"))],row.names = F, caption = "mizerParams object")
+                                               "w_min","w_mat25","k","catch_observed","biomass_observed","cutoff_size"))],row.names = F, caption = "mizerParams object")
 
 ```
 
+## Step 3 - Exploring the model
+
+In this section you will:
+
+- Develop a feel for how the various parameters affect the steady state of
+your model.
+
+The easiest way to start exploring the effect of the model parameters on its
+steady state is to use an interactive web
+application that is currently being developed in the `mizerExperimental`
+package. So we start by installing that package:
+
+```{r eval = FALSE}
+devtools::install_github("sizespectrum/mizerExperimental")
+```
+You should run the above command even if you already installed the package
+before, because it is currently changing all the time and reinstalling it will 
+give you the latest version. If you happen to already have the latest version 
+then the above command will know and not bother to reinstall.
+
+Next we load the package with
+```{r eval = FALSE}
+library(mizerExperimental)
+```
+
+We now start the web app with the command
+```{r eval = FALSE}
+params <- tuneParams(params_uncalibrated)
+```
+This will open a new tab in a webbrowser with quite a lot on it. Among many
+others there is a button labelled "Instructions" at the top left. If you click
+that you will be guided through the main elements of the page. However in this
+workshop we will demonstrate the use of the `tuneParams()` app in person once
+the current breakout room session ends.
+
+When you press the "Done" button in the app, the MizerParams object with all
+the changes you have made to it will be returned. You can now continue to work
+with it in the console. For example you could try
+```{r eval = FALSE}
+plot(params)
+```
 
 
-## Step 3 - Running and exploring the model for the first time to check coexistence (e.g. first guess)
+## Step 4 - Tuning stock-recruitment
 
 In this section you will:
 
 - Try to get coexistence between your species manually
 
-First, let's use the `project()` function with our `mizerParams` object to project in time our initial ecosystem and see if species manage to coexist together. We set `effort=1` as we already estimated $catchability.effort$ in the `catchability` column of the species data frame.
+First, let's change the reproductive efficiency in the model to the same
+value for all species and then use the `project()` function with our `mizerParams` object to project forward in time and see if species manage to coexist together. 
 
 
 ```{r step 3 - first run, message=F, warning = F}
-sim_uncalibrated <- project(params_uncalibrated, effort = 1)
+species_params(params_uncalibrated)$erepro <- .01
+sim_uncalibrated <- project(params_uncalibrated)
 plotCalibration(sim_uncalibrated, stage = 1)
 
 ```
@@ -229,7 +272,7 @@ plotCalibration(sim_uncalibrated, stage = 1)
 
 The top panel shows the different species size spectrum at the last time step of the simulation while the bottom panel shows the abundance per species through time.
 
-These plots show that species do not coexist and several go extinct. This is because there was no external density dependence (`R_max` is set at $Inf$) and the largest species (Cod and Saithe) are out-competing the rest.
+These plots show that species do not coexist and several go extinct. This is because there was no external density dependence (`R_max` is set at `Inf`) and the largest species (Cod and Saithe) are out-competing the rest.
 
 >### Stock recruitment relationship
 > In Mizer, density dependence is modelled as a stock-recruitment relationship (SRR). The default is such that the recruitment approaches a maximum as the independendent reproduction rate (RDI) increases (similar to a Holling type II function response).
@@ -246,13 +289,11 @@ To get coexistence one needs to guess reasonable $R_{max}$ values which will sto
 ```{r step 3 - guessing coexistence, warning=F, message=F}
 params_guessed <- params_uncalibrated
 # penalise the large species with higher density dependence
-params_guessed@species_params$R_max <- params_guessed@resource_params$kappa*params_guessed@species_params$w_inf^-1
+species_params(params_guessed)$R_max <- resource_params(params_guessed)$kappa * species_params(params_guessed)$w_inf^-1
 
-params_guessed <- setParams(params_guessed) # checking if we still have a workable mizerParams object
-sim_guessed <- project(params_guessed, effort =1)
+sim_guessed <- project(params_guessed)
 # saveRDS(sim_guessed, "../../data-raw/HTM1_sim.rds")
 plotCalibration(sim_guessed)
-
 ```
 
 The ecosystem looks way better. Saithe's largest individuals are having a hard time, but at least species coexist.
@@ -288,7 +329,7 @@ If $RDI/RDD$ is too low, the efficiency of reproduction (`erepro`) can be lowere
 
 The largest species that were the most limited by our new $R_{max}$ do not show a strong density dependence. This is because they are anyway hard hit by fishing in this model. The medium-sized species are the most affected here.
 
-## Step 4 - Checking assumptions
+## Step 5 - Checking assumptions
 
 In this section you will:
 
@@ -302,8 +343,6 @@ The figure below shows an example of a calibrated ecosystem. It is obtained from
 
 Let's compare it to our own little ecosystem
 
-```{r warning= F, echo = F}
-
+```{r warning= F}
 plotSummary(sim_guessed)
-
 ```

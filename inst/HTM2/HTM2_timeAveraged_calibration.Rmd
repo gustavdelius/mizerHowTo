@@ -51,7 +51,7 @@ In this section you will:
 
 - use a package that will calibrate `R_max` per species
 
-`R_max` affects the relative biomass of each species (and, combined with the fishing parameters, the catches). We are going to change `R_max` with the aim of minimising the error between observed and estimated catches or biomasses. Both `erepro` and `kappa` affect the relative biomass of each species and can be used (as in Jacobsen et al., 2014 & Spence et al., 2016) but for now we are going to keep them at default value and focus on `R_max` only.
+`R_max` affects the relative biomass of each species (and, combined with the fishing parameters, the catches). We are going to change `R_max` with the aim of minimising the error between observed and estimated catches or biomasses. Both `erepro` and `kappa` affect the relative biomass of each species and can be used (as in Jacobsen et al., 2016 & Spence et al., 2016) but for now we are going to keep them at default value and focus on `R_max` only.
 
 First let's set up a function running the model and outputting the difference between predicted catches (`getYield()`) and actual catches (`catchAvg`). `getError()` outputs the sum of squared errors between the two.
 
