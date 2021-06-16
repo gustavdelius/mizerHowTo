@@ -4,7 +4,7 @@
 \alias{shiny_erepro}
 \title{shiny app to tweak erepro}
 \usage{
-shiny_erepro(input)
+shiny_erepro(input, dat = NULL)
 }
 \description{
 shiny app to tweak erepro

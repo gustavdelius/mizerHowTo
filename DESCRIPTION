@@ -22,7 +22,8 @@ Depends:
     R (>= 3.5),
     mizer (>= 2.1.0),
     ggplot2,
-    dplyr
+    dplyr,
+    parallel
 Imports:
     mizerExperimental,
     tibble,
@@ -37,7 +38,6 @@ Imports:
     rstudioapi
 Suggests:
     tictoc,
-    parallel,
     rmarkdown
 Collate:
     'shiny_apps.R'

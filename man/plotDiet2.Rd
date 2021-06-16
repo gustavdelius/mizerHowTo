@@ -2,10 +2,22 @@
 % Please edit documentation in R/utility.R
 \name{plotDiet2}
 \alias{plotDiet2}
-\title{Plot ....}
+\title{Function showing the diet proportion of predators}
 \usage{
 plotDiet2(sim, species = NULL, xlim = c(1, NA), returnData = F)
 }
+\arguments{
+\item{sim}{An object if class MizerSim}
+
+\item{species}{A character string of the species name. If NULL, all species
+are shwon as facets. Default is NULL}
+
+\item{xlim}{A numeric vector of length two providing lower and upper limits for the x axis.
+Use NA to refer to the existing minimum or maximum. Default is c(1,NA).}
+
+\item{returnData}{A boolean value that determines whether to return the plot
+or the data itself. Default is FALSE}
+}
 \description{
-Plot ....
+Function showing the diet proportion of predators
 }

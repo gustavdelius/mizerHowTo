@@ -2,19 +2,37 @@
 % Please edit documentation in R/utility.R
 \name{plotSummary}
 \alias{plotSummary}
-\title{Plot ....}
+\title{Summary plot displaying 8 differents plots useful to assess the state of
+a mizerSim object.}
 \usage{
 plotSummary(
   x,
-  y,
   power = 1,
   wlim = c(0.001, NA),
-  short = F,
   save_it = FALSE,
   name_save = NULL,
   ...
 )
 }
+\arguments{
+\item{x}{An object of class MizerSim}
+
+\item{power}{The abundance is plotted as the number density times the weight raised to power.
+The default power = 1 gives the biomass density, whereas power = 2 gives the biomass density
+with respect to logarithmic size bins.}
+
+\item{wlim}{A numeric vector of length two providing lower and upper limits for the x axis.
+Use NA to refer to the existing minimum or maximum. Default is c(0.001,NA).}
+
+\item{save_it}{Boleean value that determines whether to save the output of the function or not.
+Default is FALSE}
+
+\item{name_save}{Character string to give a specific name if saving the plot. Default is NULL}
+}
 \description{
-Plot ....
+Left column (top to bottom) is: size spectrum, feeding level, predation
+and fishing mortality on linear scale, predation and fishing mortality
+on a log scale
+Right column (top to bottom) is: predicted catches and biomass, RDD/RDI,
+biomass, PPMR per size of predator (work in progress)
 }

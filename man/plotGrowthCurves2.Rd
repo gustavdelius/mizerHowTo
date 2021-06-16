@@ -2,7 +2,7 @@
 % Please edit documentation in R/utility.R
 \name{plotGrowthCurves2}
 \alias{plotGrowthCurves2}
-\title{Plot ....}
+\title{Plot growth curves giving weight as a function of age}
 \usage{
 plotGrowthCurves2(
   object,
@@ -14,6 +14,33 @@ plotGrowthCurves2(
   returnData = F
 )
 }
+\arguments{
+\item{object}{An object of class \linkS4class{MizerSim} or
+\linkS4class{MizerParams}.}
+
+\item{species}{The species to be selected. Optional. By default all target species
+are selected. A vector of species names, or a numeric vector with the species indices,
+or a logical vector indicating for each species whether it is to be selected (TRUE) or not.}
+
+\item{max_age}{The age up to which to run the growth curve. Default is 20.}
+
+\item{percentage}{Boolean value. If TRUE, the size is given as a percentage of the maximal size.}
+
+\item{species_panel}{If TRUE, display all species with their Von Bertalanffy curves as facets
+(need species and percentage to be set to default). Default FALSE.}
+
+\item{highlight}{Name or vector of names of the species to be highlighted.}
+
+\item{return_data}{A boolean value that determines whether the formated data
+used for the plot is returned instead of the plot itself. Default value is FALSE}
+
+\item{A}{boolean value that determines whether the formated data used for the plot is returned
+instead of the plot itself. Default value is FALSE}
+}
 \description{
-Plot ....
+When the growth curve for only a single species is plotted, horizontal lines are included
+that indicate the maturity size and the maximum size for that species. If furthermore the
+species parameters contain the variables a and b for length to weight conversion and the
+von Bertalanffy parameter k_vb (and optionally t0), then the von Bertalanffy growth curve
+is superimposed in black.
 }

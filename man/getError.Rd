@@ -2,10 +2,25 @@
 % Please edit documentation in R/utility.R
 \name{getError}
 \alias{getError}
-\title{compare outputs}
+\title{Compares modelled and empirical output}
 \usage{
 getError(vary, params, dat, data_type = "catch", tol = 0.1, timetorun = 10)
 }
+\arguments{
+\item{vary}{Rmax vector, needs to be the same lenght as the number of species in params}
+
+\item{params}{mizerParams object containing the species parameters}
+
+\item{dat}{empirical data of catch or SSB}
+
+\item{data_type}{type of the data given in \code{dat}. Either "catch" or "SSB". Default is "catch"}
+
+\item{tol}{Default is 0.1}
+
+\item{timetorun}{lenght of simulation. Default is 10}
+}
 \description{
-compare outputs
+Function that takes as input a vector of Rmax values and empirical data of catch or SSB
+It runs a mizer simulation with the Rmax values,calculate the difference of predicted
+and observed yield (or biomass) and return the sum of squared errors of the difference.
 }

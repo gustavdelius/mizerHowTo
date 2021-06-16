@@ -197,8 +197,9 @@ You will note that in the case of the North Sea, we provide another parameter `k
 > In Mizer, a background resource spectrum is simulated to represent all the food sources that are not explicilty modelled as fish. It is especially useful to feed small-sized fish that are not piscivores. The carrying capacity of the background spectrum is determined by `kappa` and its regeneration rate by `r_pp`. High `kappa` implies more food and therefore faster growth rate and/or higher sustainable fish biomass.
 
 ```{r step 2 - mizerParams tweaks NS, echo = F}
-# small edit to the mizerParam object to change the colours used in plots
-params_uncalibrated@linecolour[1:12] <- viridis::viridis(dim(params_uncalibrated@species_params)[1]) # colour gradient of asymptotic sizes
+# small edits to the mizerParam object
+species_params(params_uncalibrated)$erepro <- .01 # default is 1
+params_uncalibrated@linecolour[1:12] <- viridis::viridis(dim(params_uncalibrated@species_params)[1]) # color gradient of asymptotic sizes
 ```
 
 
@@ -206,7 +207,6 @@ params_uncalibrated@linecolour[1:12] <- viridis::viridis(dim(params_uncalibrated
 knitr::kable(params_uncalibrated@species_params[,-which(colnames(params_uncalibrated@species_params) %in% 
                                              c("sel_func","gear","interaction_resource","pred_kernel_type","m","alpha","n","p","q",
                                                "w_min","w_mat25","k"))],row.names = F, caption = "mizerParams object")
-
 
 ```
 
@@ -270,6 +270,9 @@ These plots show that species do not coexist and several go extinct. This is bec
 ![Figure 2: Illustration of the interplay between the reproductive output and the external density dependence. The model simulates a size spectrum of each species (right). From that spectrum it calculates the reproductive output (blue arrow). The reproductive output is reduced by imposing an external density dependence in the form of a stock recruitment relationship (left panel; orange line). The recruitment then determines the flow of new recruits into the size spectrum. The simulation continues until the size spectrum reaches an equilibrium (which may be a dynamic equilibrium). Changing Rmax up or down by a factor results in a change up or down of the spectrum by the same factor. Rmax therefore functions as the central parameter that adjusts the total biomass of a species.](../figures/Rmax.png)
 
 To get coexistence one needs to guess reasonable $R_{max}$ values which will stop out-competition from a few species. We find that the density dependence is positively related to body size, meaning that large individuals will need to have a stronger density-dependence applied to them (and therefore a lower $R_{max}$ value). Let's start again and set some guessed `R_max` values.
+
+
+>Question: What does Rmax need to be to achieve coexistence? Experiment with the code chunk below.
 
 ```{r step 3 - guessing coexistence, warning=F, message=F}
 params_guessed <- params_uncalibrated

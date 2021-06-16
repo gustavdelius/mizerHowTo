@@ -2,7 +2,7 @@
 % Please edit documentation in R/utility.R
 \name{plotCalibration}
 \alias{plotCalibration}
-\title{Plot ....}
+\title{Summary function bundling helpful plots during calibration.}
 \usage{
 plotCalibration(
   sim,
@@ -13,6 +13,19 @@ plotCalibration(
   effortRes = 10
 )
 }
+\arguments{
+\item{stage}{Numeric values which determines the function's output. Range from 1 to 3.
+Default is 1.}
+
+\item{wlim}{A numeric vector of length two providing lower and upper limits for the x axis.
+Use NA to refer to the existing minimum or maximum. Default is c(0.001,NA).}
+
+\item{power}{The abundance is plotted as the number density times the weight raised to power.
+The default power = 1 gives the biomass density, whereas power = 2 gives the biomass density
+with respect to logarithmic size bins.}
+}
 \description{
-Plot ....
+Stage 1 shows size spectra, biomass and predicted versus observed yield
+Stage 2 shows the pannel of fisheries effort versus yield
+Stage 3 shows the pannel of growth curves
 }

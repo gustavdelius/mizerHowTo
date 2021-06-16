@@ -32,7 +32,12 @@ tutorial <- function(tutorial_name = "HTM1", extension = "html") {
   )
 }
 
-# extract legend from ggplot object to use it in grid plots
+#' Create ggplot legend object
+#'
+#' Function that extracts the legend from ggplot object to use it in grid plots
+#'
+#' @param a.gplot A ggplot object
+
 g_legend<-function(a.gplot){
   tmp <- ggplot_gtable(ggplot_build(a.gplot))
   leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
@@ -40,7 +45,17 @@ g_legend<-function(a.gplot){
   return(legend)}
 
 
-#' compare outputs
+#' Compares modelled and empirical output
+#'
+#' Function that takes as input a vector of Rmax values and empirical data of catch or SSB
+#' It runs a mizer simulation with the Rmax values,calculate the difference of predicted
+#' and observed yield (or biomass) and return the sum of squared errors of the difference.
+#' @param vary Rmax vector, needs to be the same lenght as the number of species in params
+#' @param params mizerParams object containing the species parameters
+#' @param dat empirical data of catch or SSB
+#' @param data_type type of the data given in `dat`. Either "catch" or "SSB". Default is "catch"
+#' @param tol Default is 0.1
+#' @param timetorun lenght of simulation. Default is 10
 #'
 #' @export
 getError <- function(vary,params,dat,data_type="catch", tol = 0.1,timetorun=10)
@@ -86,10 +101,26 @@ getError <- function(vary,params,dat,data_type="catch", tol = 0.1,timetorun=10)
 }
 
 
-#' Plot ....
+#' Summary plot displaying 8 differents plots useful to assess the state of
+#' a mizerSim object.
+#'
+#' Left column (top to bottom) is: size spectrum, feeding level, predation
+#' and fishing mortality on linear scale, predation and fishing mortality
+#' on a log scale
+#' Right column (top to bottom) is: predicted catches and biomass, RDD/RDI,
+#' biomass, PPMR per size of predator (work in progress)
+#' @param x An object of class MizerSim
+#' @param power The abundance is plotted as the number density times the weight raised to power.
+#' The default power = 1 gives the biomass density, whereas power = 2 gives the biomass density
+#' with respect to logarithmic size bins.
+#' @param wlim A numeric vector of length two providing lower and upper limits for the x axis.
+#' Use NA to refer to the existing minimum or maximum. Default is c(0.001,NA).
+#' @param save_it Boleean value that determines whether to save the output of the function or not.
+#' Default is FALSE
+#' @param name_save Character string to give a specific name if saving the plot. Default is NULL
 #'
 #' @export
-plotSummary <- function (x, y, power = 1, wlim = c(.001,NA), short = F, save_it = FALSE, name_save = NULL, ...)
+plotSummary <- function (x, power = 1, wlim = c(.001,NA), save_it = FALSE, name_save = NULL, ...)
 {
   xlim = c(wlim[1],10^log10(max(x@params@species_params$w_inf)))
   font_size = 7
@@ -124,22 +155,7 @@ plotSummary <- function (x, y, power = 1, wlim = c(.001,NA), short = F, save_it 
                    panel.background = element_blank(),
                    panel.grid.minor = element_line(color = "gray"),
                    panel.border = element_rect(colour = "gray", fill=NA, size=.5))
-  # theme_bw()
 
-  if(short)
-  {
-    p1 <- p1 +theme(axis.title.x=element_text(),
-                    axis.text.x=element_text(),
-                    axis.ticks.x=element_line())
-
-    leftCol <- plot_grid(p1,p7,
-                         ncol = 1, align = "v", axis = "l")
-    p10 <- plot_grid(leftCol, mylegend,
-                     rel_widths = c(6,1),
-                     ncol = 2)
-
-  } else
-  {
 
 
     dat2 <- plotFeedingLevel2(x, include_critical = T, return_data = T)#,...)
@@ -353,7 +369,7 @@ plotSummary <- function (x, y, power = 1, wlim = c(.001,NA), short = F, save_it 
     p8 <- ggplot(plot_dat) +
       geom_line(aes(x = w, y = prey_mass, color = species)) +
       scale_x_continuous(name = "Predator mass (g)", trans = "log10",limits = xlim) +
-      scale_y_continuous(name = "Mean prey mass (g)", trans = "log10") +
+      scale_y_continuous(name = "Normalised PPMR", trans = "log10") +
       scale_colour_manual(values = x@params@linecolour) +
       theme(panel.background = element_blank(),
             panel.grid.minor = element_line(color = "gray"),
@@ -390,7 +406,7 @@ plotSummary <- function (x, y, power = 1, wlim = c(.001,NA), short = F, save_it 
 
     # grid.newpage()
     # grid.draw(p10)
-  }
+
   # p <- grid.arrange(p10,mylegend, nrow=2,heights=c(9.5,0.5))
 
   if(save_it & !is.null(name_save)) ggsave(p10, filename = paste(name_save,".png",sep=""), units = "cm", width = 21, height = 29)
@@ -399,9 +415,13 @@ plotSummary <- function (x, y, power = 1, wlim = c(.001,NA), short = F, save_it 
   return(p10)
 }
 
-# hopefully all of this will go on sizespectrum/mizer, in the meantime
 
-#' Plot ....
+#' A function that plots the predicted yield versus observed yield.
+#'
+#' @param sim An object if class MizerSim
+#' @param dat A dataframe containing the observed yield values
+#' @param returnData A boolean value that determines whether to return the plot
+#' or the data itself. Default is FALSE
 #'
 #' @export
 plotPredObsYield <-function(sim, dat, returnData = FALSE){
@@ -423,15 +443,23 @@ plotPredObsYield <-function(sim, dat, returnData = FALSE){
     scale_size_manual(values = w_inf) +
     scale_color_manual(values = sim@params@linecolour) +
     geom_abline(color = "black", slope = 1, intercept = 0, linetype = "dashed", alpha = .5) +
-    scale_x_continuous(name = "log10 Predicted Yield", limits = winLim) +
-    scale_y_continuous(name = "log10 Observed Yield", limits = winLim) +
+    scale_x_continuous(name = "log10 Predicted Yield in t/year", limits = winLim) +
+    scale_y_continuous(name = "log10 Observed Yield in t/year", limits = winLim) +
     theme(legend.position = "none", legend.key = element_rect(fill = "white"),
           panel.background = element_blank(), panel.grid.minor = element_line(color = "gray"))
 
   if(returnData) return(plot_dat) else return(p)
 }
 
-#' Plot ....
+#' Function showing the diet proportion of predators
+#'
+#' @param sim An object if class MizerSim
+#' @param species A character string of the species name. If NULL, all species
+#' are shwon as facets. Default is NULL
+#' @param xlim A numeric vector of length two providing lower and upper limits for the x axis.
+#' Use NA to refer to the existing minimum or maximum. Default is c(1,NA).
+#' @param returnData A boolean value that determines whether to return the plot
+#' or the data itself. Default is FALSE
 #'
 #' @export
 plotDiet2 <- function (sim, species = NULL, xlim = c(1,NA), returnData = F)
@@ -474,9 +502,19 @@ plotDiet2 <- function (sim, species = NULL, xlim = c(1,NA), returnData = F)
   if(returnData) return(plot_dat) else return(p)
 
 }
-# Try facets
 
-#' Plot ....
+#' A function plotting the fisheries effort versus yield of a species.
+#'
+#' @param params An object of class MizerParams
+#' @param effortRes A numeric value determinin the number of simulation
+#' to be run per species. A high number offers a better resolution of
+#' the plot albeit for a longer computing time. Default is 20
+#' @param returnData A boolean value that determines whether to return the plot
+#' or the data itself. Default is FALSE
+#' @param speciesData A list of size 2. If provided, the function uses the
+#' first slot (character string of a species name) to compute only that particular
+#' species and update it in the second slot (a plotFmsy(returnData = TRUE) output).
+#' Used in shiny apps to decrease the run time. Default is NULL
 #'
 #' @export
 plotFmsy <- function(params, effortRes = 20, returnData = F, speciesData = NULL)
@@ -583,8 +621,28 @@ plotFmsy <- function(params, effortRes = 20, returnData = F, speciesData = NULL)
 
 }
 
-#' Plot ....
+
+#' Plot growth curves giving weight as a function of age
 #'
+#' When the growth curve for only a single species is plotted, horizontal lines are included
+#' that indicate the maturity size and the maximum size for that species. If furthermore the
+#' species parameters contain the variables a and b for length to weight conversion and the
+#' von Bertalanffy parameter k_vb (and optionally t0), then the von Bertalanffy growth curve
+#' is superimposed in black.
+#' @param object An object of class \linkS4class{MizerSim} or
+#'   \linkS4class{MizerParams}.
+#' @param return_data A boolean value that determines whether the formated data
+#' used for the plot is returned instead of the plot itself. Default value is FALSE
+#' @param species The species to be selected. Optional. By default all target species
+#' are selected. A vector of species names, or a numeric vector with the species indices,
+#' or a logical vector indicating for each species whether it is to be selected (TRUE) or not.
+#' @param max_age The age up to which to run the growth curve. Default is 20.
+#' @param percentage Boolean value. If TRUE, the size is given as a percentage of the maximal size.
+#' @param species_panel  If TRUE, display all species with their Von Bertalanffy curves as facets
+#' (need species and percentage to be set to default). Default FALSE.
+#' @param highlight Name or vector of names of the species to be highlighted.
+#' @param A boolean value that determines whether the formated data used for the plot is returned
+#' instead of the plot itself. Default value is FALSE
 #' @export
 plotGrowthCurves2 <- function (object,
                                species = NULL,
@@ -726,8 +784,14 @@ getBiomassFrame2 <- function (sim, species = dimnames(sim@n)$sp[!is.na(sim@param
   return(bm)
 }
 
-#' Plot ....
+#' Summary function bundling helpful plots during calibration.
 #'
+#' Stage 1 shows size spectra, biomass and predicted versus observed yield
+#' Stage 2 shows the pannel of fisheries effort versus yield
+#' Stage 3 shows the pannel of growth curves
+#' @inherit plotSummary
+#' @param stage Numeric values which determines the function's output. Range from 1 to 3.
+#' Default is 1.
 #' @export
 plotCalibration <- function(sim, catch_dat = NULL, stage = 1, wlim = c(.1,NA), power = 1, effortRes = 10)
 {

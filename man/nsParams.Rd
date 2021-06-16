@@ -5,7 +5,7 @@
 \alias{nsParams}
 \title{Species specific parameters for the North Sea}
 \format{
-An object of class \code{data.frame} with 12 rows and 13 columns.
+An object of class \code{data.frame} with 12 rows and 16 columns.
 }
 \usage{
 nsParams
