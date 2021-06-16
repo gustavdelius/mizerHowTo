@@ -138,7 +138,7 @@ More information on how to set this up is here: https://sizespectrum.org/mizer/a
 
 
 ```{r step 1 - tables, echo = F }
-knitr::kable(nsParams, caption = "North Sea species' parameters") 
+knitr::kable(nsParams[,-c(14,15,16)], caption = "North Sea species' parameters") 
 knitr::kable(interNS, caption = "North Sea interaction matrix") 
 ```
 
@@ -205,7 +205,7 @@ params_uncalibrated@linecolour[1:12] <- viridis::viridis(dim(params_uncalibrated
 ```{r step 2 - mizerParams table NS, echo = F}
 knitr::kable(params_uncalibrated@species_params[,-which(colnames(params_uncalibrated@species_params) %in% 
                                              c("sel_func","gear","interaction_resource","pred_kernel_type","m","alpha","n","p","q",
-                                               "w_min","w_mat25","k"))],row.names = F, caption = "mizerParams object")
+                                               "w_min","w_mat25","k","catch_observed","biomass_observed","cutoff_size"))],row.names = F, caption = "mizerParams object")
 
 ```
 

@@ -11,7 +11,7 @@ tutorial(tutorial_name = "HTM1", extension = "html")
 and "HTM2". Default is "HTM1".}
 
 \item{extension}{The extension of the tutorial. Accepted values are "html"
-and "Rmd". Default is "html".}
+"website" (direct to sizespectrum.org) and "Rmd". Default is "html".}
 }
 \description{
 Opens the file of a tutorial in RStudio so that the user can read it or
