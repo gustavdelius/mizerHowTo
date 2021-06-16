@@ -16,8 +16,7 @@ tutorial <- function(tutorial_name = "HTM1", extension = "html") {
               rstudioapi::navigateToFile(
                 system.file("HTM1", "HTM1_parametrisation.Rmd",
                             package = "mizerHowTo"))
-            } else if (extension == "html") browseURL(system.file("HTM1", "HTM1_parametrisation.html",
-                                                                  package = "mizerHowTo"))
+            } else if (extension == "html") browseURL("https://sizespectrum.org/mizerHowTo/articles/HTM1_parametrisation.html")
           },
           "HTM2" = {
             if(extension == "Rmd")
@@ -25,8 +24,7 @@ tutorial <- function(tutorial_name = "HTM1", extension = "html") {
               rstudioapi::navigateToFile(
                 system.file("HTM2", "HTM2_timeAveraged_calibration.Rmd",
                             package = "mizerHowTo"))
-            } else if (extension == "html") browseURL(system.file("HTM2", "HTM2_timeAveraged_calibration.html",
-                                                                  package = "mizerHowTo"))
+            } else if (extension == "html") browseURL("https://sizespectrum.org/mizerHowTo/articles/HTM2_timeAveraged_calibration.html")
           },
           {print("Something went wrong")}
   )
