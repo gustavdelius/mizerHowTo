@@ -232,13 +232,21 @@ then the above command will know and not bother to reinstall.
 
 We now start the web app with the command
 ```{r eval = FALSE}
-tuneParams(params_uncalibrated)
+params <- tuneParams(params_uncalibrated)
 ```
 This will open a new tab in a webbrowser with quite a lot on it. Among many
 others there is a button labelled "Instructions" at the top left. If you click
 that you will be guided through the main elements of the page. However in this
 workshop we will demonstrate the use of the `tuneParams()` app in person once
 the current breakout room session ends.
+
+When you press the "Done" button in the app, the MizerParams object with all
+the changes you have made to it will be returned. You can now continue to work
+with it in the console. For example you could try
+```{r eval = FALSE}
+plot(params)
+```
+
 
 ## Step 4 - Tuning stock-recruitment
 
