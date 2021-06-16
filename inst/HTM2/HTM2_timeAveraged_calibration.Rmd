@@ -51,7 +51,7 @@ In this section you will:
 
 - use a package that will calibrate `R_max` per species
 
-`R_max` affects the relative biomass of each species (and, combined with the fishing parameters, the catches). We are going to change with the aim of minimising the error between observed and estimated catches or biomasses. Both `erepro` and `kappa` affect the relative biomass of each species and can be used (as in Blanchard et al. 2014 & Spence et al. 2016) but for now we are going to keep them at default value and focus on `R_max` only.
+`R_max` affects the relative biomass of each species (and, combined with the fishing parameters, the catches). We are going to change with the aim of minimising the error between observed and estimated catches or biomasses. Both `erepro` and `kappa` affect the relative biomass of each species and can be used (as in Jacobsen et al., 2014 & Spence et al., 2016) but for now we are going to keep them at default value and focus on `R_max` only.
 
 First let's set up a function running the model and outputting the difference between predicted catches (`getYield()`) and actual catches (`catchAvg`). `getError()` outputs the sum of squared errors between the two.
 
@@ -111,15 +111,17 @@ In this section you will:
 
 - Check what impact `erepro` has on the $F_{msy}$
 
-`erepro` represents all the losses that occur between energy allocated to reproduction and the recruitment (expect those due to density dependence). That would be: the energy conversion efficiency between energy allocated to reproduction and eggs, cost of spawning migration and actual spawning (e.g. forgone feeding), and egg mortality. Lowering `erepro` biologically means higher egg mortality rate or wasteful energy invested into gonads. For example, `erepro` is currently set to $0.01$ meaning, that for every one g of mass allocated to reproduction, $0.01$ g will be used as spawn recruitment, the rest is lost. This coefficient is applied before any density-dependence is applied. Let's use Rshiny to see how varying `erepro` influences the ecosystem (to play around).
+`erepro` represents all the losses that occur between energy allocated to reproduction and the recruitment (expect those due to density dependence). That would be: the energy conversion efficiency between energy allocated to reproduction and eggs, cost of spawning migration and actual spawning (e.g. forgone feeding), and egg mortality. Lowering `erepro` biologically means higher egg mortality rate or wasteful energy invested into gonads. For example, `erepro` is currently set to 0.01 meaning, that for every one g of mass allocated to reproduction, 0.01 g will be used as spawn recruitment, the rest is lost. This coefficient is applied before any density-dependence is applied. Let's use Rshiny to see how varying `erepro` influences the ecosystem (to play around).
 
 ```{r step 2 rshiny-erepro, eval = F, echo = T}
-shiny_erepro(input = HTM2_sim_optim1@params)
+shiny_erepro(input = HTM2_sim_optim1@params, dat = catchAvg$Catch_1419_tonnes)
 ```
 
 A good indicator of realistic `erepro` value is the shape of the fishing mortality rate versus yield curve. Such graph allows to determine the fisheries maximum sustainable yield when harvesting a species and is supposed to have a bell shape. Too high fishing mortality depletes the stock and reduce the yield whereas too low fishing mortality simply means low yield. The $F_{msy}$ sits in the middle, at the top of the bell. If a species is too reproduction efficient and can replenish its biomass even under high fisheries mortality, it can tolerate a high $F_{msy}$, and its `erepro` is too high. Conversely, if a low fisheries mortality depletes the stock right away, the species' `erepro` is too low.
 
 Let's take a look at the current $F_{msy}$ per species. 
+
+Note that `plotFmsy()` takes a long time to compute, especially at high effort resolution (`effortRes` argument which determines the number of simulation per species that are run). 
 
 ```{r step 2 - Fmsy | data crunching, eval=F, echo = F}
 # Not evaluated because slow (especially at high effortRes)
@@ -135,7 +137,7 @@ ggplot(plot_dat) +
   facet_wrap(species~., scales = "free") +
   scale_x_continuous(limits= c(0,1.5),name = "fishing mortality rate")+
   scale_y_continuous(trans = "log10") +
-  scale_color_manual(name = "Species", values = sim_optim@params@linecolour) +
+  scale_color_manual(name = "Species", values = HTM2_sim_optim1@params@linecolour) +
   theme(legend.position = "none", 
         legend.key = element_rect(fill = "white"),
         panel.background = element_blank(), 
@@ -152,7 +154,7 @@ shiny_fmsy(params = HTM2_sim_optim1@params, dat = HTM2_Fmsy2)
 ```
 > Note: the shiny app only calculate the $F_{msy}$ of one species at a time (for speed reasons) and the final results may not be exactly the same as calculating the $F_{msy}$ for every species together (as shown below)
 
-Let's see what our system looks like with species-specific `erepro`
+We have tweaked `erepro` per species using the shiny app, let's add these new values in the `mizerParams` object and run a simulation again. The values used in the block below are specific to the North Sea and will differ from any other ecosystem.
 
 ```{r step 2 - Fmsy with tweaked erepro, warning=F}
 sim_optim <- HTM2_sim_optim1
@@ -180,7 +182,7 @@ ggplot(plot_dat) +
   facet_wrap(species~., scales = "free") +
   scale_x_continuous(limits= c(0,1.5),name = "fishing mortality rate")+
   scale_y_continuous(trans = "log10") +
-  scale_color_manual(name = "Species", values = sim_optim@params@linecolour) +
+  scale_color_manual(name = "Species", values = sim_optim2@params@linecolour) +
   theme(legend.position = "none", 
         legend.key = element_rect(fill = "white"),
         panel.background = element_blank(), 
@@ -189,11 +191,12 @@ ggplot(plot_dat) +
 
 ```
 
-Some trade-offs here, relatively high `erepro` allows Sprat to coexist with the other species but the $F_{msy}$ plot doesn't have the characteristic bell shape. Here Sprat is too efficient and survive even at high fisheries mortality. Note that the curve could start to go down at higher fisheries mortality.
+Now, we see all species' yield go down at high fishing mortality rate. It means that the species are not super efficient at reproduction anymore and do decrease in biomass under high fishing mortality rate.
 
 Before spending more time hand-tweaking these species, we are going to run the `R_max` calibration again to see if we improved the yield match (as in step 1).
 
-Iterating the calibration process multiple times can help find better `R_max` values as the first run of `optimParallel` may not find the best combination of `R_max`. Below is an example of `optimParallel` being looped five times. 
+Iterating the `R_max` calibration process multiple times can help find better `R_max` values as the first run of `optimParallel()` may not find the best combination of `R_max`. Below is an example of `optimParallel()` being run five times in a row with progressively smaller error between empirical catches data and modelled catches. After each run of `optimParallel()` the result is used as new input for the next iteration.
+
 
 ```{r step 2 - looping rmax calibration crunch, message = F, eval=F}
 # looping calibration to get more accurate results
@@ -281,7 +284,7 @@ The diets look great as the fish feed on each other and do not rely too much on 
 
 
 ```{r step 3 rshiny-kappa, eval = F, echo =T}
-shiny_kappa(param = HTM2_sim_optim3@params)
+shiny_kappa(param = HTM2_sim_optim3@params, dat = catchAvg$Catch_1419_tonnes)
 ```
 
 
@@ -302,7 +305,7 @@ Such values stop species from growing too fast. Now let's help the one growing t
 
 
 ```{r step 3 rshiny-gamma, eval = F, echo = T}
-shiny_gamma(param = HTM2_sim_optim3@params)
+shiny_gamma(param = HTM2_sim_optim3@params, dat = catchAvg$Catch_1419_tonnes)
 ```
 
 

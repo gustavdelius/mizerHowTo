@@ -423,8 +423,8 @@ plotPredObsYield <-function(sim, dat, returnData = FALSE){
     scale_size_manual(values = w_inf) +
     scale_color_manual(values = sim@params@linecolour) +
     geom_abline(color = "black", slope = 1, intercept = 0, linetype = "dashed", alpha = .5) +
-    scale_x_continuous(name = "log10 Predicted Yield", limits = winLim) +
-    scale_y_continuous(name = "log10 Observed Yield", limits = winLim) +
+    scale_x_continuous(name = "log10 Predicted Yield in t/year", limits = winLim) +
+    scale_y_continuous(name = "log10 Observed Yield in t/year", limits = winLim) +
     theme(legend.position = "none", legend.key = element_rect(fill = "white"),
           panel.background = element_blank(), panel.grid.minor = element_line(color = "gray"))
 
