@@ -90,7 +90,8 @@ stopCluster(cl)
 ```{r step 1 - results, message=FALSE,warning=FALSE}
 # if previous block wasn't run, load the saved value
 # load("optimParallel_Rmax1.RDS")
-optim_result <- optim_result
+# optim_result <- optim_result
+
 # we are using a saved file:
 optim_result <- HTM2_optimParallel_Rmax1
 
@@ -319,8 +320,7 @@ shiny_gamma(param = HTM2_sim_optim3@params, dat = catchAvg$Catch_1419_tonnes)
 Let's input the new gamma value in a new set of parameters
 
 ```{r step 3 updating gamma}
-newGamma <- c(1.100000e-10, 6.000000e-11, 9.910525e-11, 7.707098e-11, 2.556902e-11, 4.717030e-11,
-              5.272039e-11, 1.009092e-10, 4.565019e-11, 7.837794e-11, 4.000000e-10, 2.365167e-10)
+newGamma <- c(1.100000e-10, 6.000000e-11, 9.910525e-11, 7.707098e-11, 2.556902e-11, 4.717030e-11, 5.272039e-11, 1.009092e-10, 4.565019e-11, 7.837794e-11, 4.000000e-10, 2.365167e-10)
 
 params_growth <- sim_loop@params
 params_growth@species_params$gamma <- newGamma
@@ -348,6 +348,18 @@ plotDiet2(sim_growth)
 
 One will note that changing the the search volume of some species did not affect the diet. Therefore `gamma` doesn't influence the diet proportion.
 
-#What other parameters could be investigated here?
+>Question: What other parameters could be investigated here? Why are Sprat catches so much higher?
+
+## Summary 
+
+There are many other possible approaches for model calibration and post-hoc exploration. A couple of other approaches we have put together that you may be interested in exploring on your own are:
+
+- tuneParams() is a more comprehensive shiny app to explore, tune and help understand mizer models. 
+
+- HTM3 is a more davanced tutoiral that uses time-series fitting (work in progress but feel free to check it out and let us know what you think)
+
+Finally we would love to have your *feedback* as we develop these course materials further. Please fill out our survey here:
+
+https://forms.office.com/Pages/ResponsePage.aspx?id=VV3rFZEZvEaNp6slI03uCIO3rXPo2ElDlBTBXAspLLxUNDVCNDI4RUpEMFpKTzFCU01JV1BFVllSSC4u
 
 
