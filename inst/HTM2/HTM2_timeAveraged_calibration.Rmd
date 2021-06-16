@@ -352,11 +352,13 @@ One will note that changing the the search volume of some species did not affect
 
 ## Summary 
 
-There are many other possible approaches for model calibration and post-hoc exploration. A couple of other approaches we have put together that you may be interested in exploring on your own are:
+There are some limitations of the above approach and there are many other possible approaches for model calibration and post-hoc exploration. It is also possible to use more data in both the model calibration and evaluation steps. A couple of other approaches we have put together that you may be interested in exploring on your own are:
 
-- tuneParams() is a more comprehensive shiny app to explore, tune and help understand mizer models. 
+- tuneParams() in the 'mizerExperimental' package is a more comprehensive shiny app to explore, tune and help you understand mizer models, including the effects of different parameters. 
 
-- HTM3 is a more davanced tutoiral that uses time-series fitting (work in progress but feel free to check it out and let us know what you think)
+- HTM3 is a more advanced automated calibration tutorial that uses time-series catch data instead of time-averaged data. This has the advantage of using many more data points and enabling simultaneously estimates of  Rmax, erepro, and/or other parameters of interest. It has the advantage of not relying on assumptions about the shape of the single-species yield curves.
+
+These are work in progress but feel free to check them out and let us know what you think.
 
 Finally we would love to have your *feedback* as we develop these course materials further. Please fill out our survey here:
 
