@@ -51,7 +51,7 @@ In this section you will:
 
 - use a package that will calibrate `R_max` per species
 
-`R_max` affects the relative biomass of each species (and, combined with the fishing parameters, the catches). We are going to change with the aim of minimising the error between observed and estimated catches or biomasses. Both `erepro` and `kappa` affect the relative biomass of each species and can be used (as in Jacobsen et al., 2014 & Spence et al., 2016) but for now we are going to keep them at default value and focus on `R_max` only.
+`R_max` affects the relative biomass of each species (and, combined with the fishing parameters, the catches). We are going to change `R_max` with the aim of minimising the error between observed and estimated catches or biomasses. Both `erepro` and `kappa` affect the relative biomass of each species and can be used (as in Jacobsen et al., 2014 & Spence et al., 2016) but for now we are going to keep them at default value and focus on `R_max` only.
 
 First let's set up a function running the model and outputting the difference between predicted catches (`getYield()`) and actual catches (`catchAvg`). `getError()` outputs the sum of squared errors between the two.
 
@@ -89,9 +89,15 @@ stopCluster(cl)
 
 ```{r step 1 - results, message=FALSE,warning=FALSE}
 # if previous block wasn't run, load the saved value
-params_optim <- params_guessed
+# load("optimParallel_Rmax1.RDS")
+optim_result <- optim_result
+# we are using a saved file:
 optim_result <- HTM2_optimParallel_Rmax1
-# optim values:
+
+#set up param object again
+params_optim <- params_guessed
+
+# replace Rmax with optim values:
 params_optim@species_params$R_max <- 10^optim_result$par 
 params_optim <-setParams(params_optim)
 sim_optim <- project(params_optim, effort = 1, t_max = 100, dt=0.1,initial_n = sim_guessed@n[100,,],initial_n_pp = sim_guessed@n_pp[100,],progress_bar = F)
@@ -301,7 +307,7 @@ plotCalibration(sim_growth)
 
 ```
 
-Such values stop species from growing too fast. Now let's help the one growing too slow. The most important part of the curve is at the beginning before species reach maturation size. Slowing down growth will delay maturation and can lead to fluctuation in biomass. The feeding level will be close to critical at small size, creating these fluctuations (species compete to much for food). One will notice that changing the `gamma` of one species will affects other, Sprat and its predators as Sprat is a huge part of the diet of some.
+Such values stop species from growing too fast. Now let's help the one growing too slow. The most important part of the curve is at the beginning before species reach maturation size. Slowing down growth will delay maturation and can lead to fluctuation in biomass. The feeding level will be close to critical at small size, creating these fluctuations (species compete to much for food). One will notice that changing the `gamma` of one species will affect others, Sprat and its predators as Sprat is a huge part of the diet of some.
 
 
 ```{r step 3 rshiny-gamma, eval = F, echo = T}
@@ -332,7 +338,7 @@ plotGrowthCurves2(sim_growth, species_panel = T)
 plotFeedingLevel2(sim_growth, include_critical = T)
 ```
 
-Growth curves haven't changed much but the feeding level has decreased at small size (even if we theoretically increase the feeding of the small species, maybe they are now too good competitor for the other species and steal their food)
+Growth curves haven't changed much but the feeding level has decreased at small size (even if we theoretically increase the feeding of the small species, maybe they are now too good a competitor for the other species and steal their food)
 
 ```{r step 3 diets, warning=F, echo = F}
 plotDiet2(sim_growth)
@@ -341,5 +347,7 @@ plotDiet2(sim_growth)
 
 
 One will note that changing the the search volume of some species did not affect the diet. Therefore `gamma` doesn't influence the diet proportion.
+
+#What other parameters could be investigated here?
 
 
