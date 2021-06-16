@@ -240,6 +240,9 @@ These plots show that species do not coexist and several go extinct. This is bec
 
 To get coexistence one needs to guess reasonable $R_{max}$ values which will stop out-competition from a few species. We find that the density dependence is positively related to body size, meaning that large individuals will need to have a stronger density-dependence applied to them (and therefore a lower $R_{max}$ value). Let's start again and set some guessed `R_max` values.
 
+
+>Question: What does Rmax need to be to achieve coexistence? Experiment with the code chunk below.
+
 ```{r step 3 - guessing coexistence, warning=F, message=F}
 params_guessed <- params_uncalibrated
 # penalise the large species with higher density dependence
