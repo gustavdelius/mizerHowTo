@@ -12,8 +12,8 @@
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cerulean/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
@@ -87,10 +87,25 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Tutorials
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/HTM1_parametrisation.html">How to parametrise a Mizer model</a>
+    </li>
+    <li>
+      <a href="../articles/HTM2_timeAveraged_calibration.html">How to calibrate/refine a mizer model to time-averaged catch data</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/gustavdelius/mizerHowTo/">
+  <a href="https://github.com/sizespectrum/mizerHowTo/">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -109,7 +124,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>mizerHowTo</h1>
-    <small class="dont-index">Source: <a href='https://github.com/gustavdelius/mizerHowTo/blob/master/R/mizerHowTo-package.R'><code>R/mizerHowTo-package.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/sizespectrum/mizerHowTo/blob/master/R/mizerHowTo-package.R'><code>R/mizerHowTo-package.R</code></a></small>
     <div class="hidden name"><code>mizerHowTo-package.Rd</code></div>
     </div>
 
@@ -122,11 +137,21 @@
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>Useful links:</p><ul>
-<li><p><a href='https://github.com/gustavdelius/mizerHowTo'>https://github.com/gustavdelius/mizerHowTo</a></p></li>
-<li><p>Report bugs at <a href='https://github.com/gustavdelius/mizerHowTo/issues'>https://github.com/gustavdelius/mizerHowTo/issues</a></p></li>
+<li><p><a href='https://sizespectrum/mizerHowTo'>https://sizespectrum/mizerHowTo</a></p></li>
+<li><p>Report bugs at <a href='https://github.com/sizespectrum/mizerHowTo/issues'>https://github.com/sizespectrum/mizerHowTo/issues</a></p></li>
 </ul>
 
 </div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p><strong>Maintainer</strong>: Romain Forestier <a href='mailto:romain.forestier@utas.edu.au'>romain.forestier@utas.edu.au</a> [copyright holder]</p>
+<p>Authors:</p><ul>
+<li><p>Julia Blanchard <a href='mailto:julia.blanchard@utas.edu.au'>julia.blanchard@utas.edu.au</a> (<a href='https://orcid.org/0000-0003-0532-4824'>ORCID</a>) [copyright holder]</p></li>
+<li><p>Ken Andersen <a href='mailto:kha@aqua.dtu.dk'>kha@aqua.dtu.dk</a> (<a href='https://orcid.org/0000-0002-8478-3430'>ORCID</a>) [copyright holder]</p></li>
+<li><p>Gustav Delius <a href='mailto:gustav.delius@york.ac.uk'>gustav.delius@york.ac.uk</a> (<a href='https://orcid.org/0000-0003-4092-8228'>ORCID</a>) [copyright holder]</p></li>
+</ul>
+
+
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -139,7 +164,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by The package maintainer.</p>
+  <p>Developed by Julia Blanchard, Ken Andersen, Romain Forestier, Gustav Delius.</p>
 </div>
 
 <div class="pkgdown">
