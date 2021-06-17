@@ -1090,5 +1090,260 @@ plotFeedingLevel2 <- function (object, species = NULL, time_range, highlight = N
   else return(p)
 }
 
+plotSpectra <- function(object, species = NULL,
+                        time_range,
+                        wlim = c(NA, NA), ylim = c(NA, NA),
+                        power = 1, biomass = TRUE,
+                        total = FALSE, resource = TRUE,
+                        background = TRUE,
+                        highlight = NULL, return_data = FALSE, ...) {
+  # to deal with old-type biomass argument
+  if (missing(power)) {
+    power <- as.numeric(biomass)
+  }
+  species <- valid_species_arg(object, species)
+  if (is(object, "MizerSim")) {
+    if (missing(time_range)) {
+      time_range  <- max(as.numeric(dimnames(object@n)$time))
+    }
+    time_elements <- get_time_elements(object, time_range)
+    n <- apply(object@n[time_elements, , , drop = FALSE], c(2, 3), mean)
+    n_pp <- apply(object@n_pp[time_elements, , drop = FALSE], 2, mean)
+    ps <- plot_spectra(object@params, n = n, n_pp = n_pp,
+                       species = species, wlim = wlim, ylim = ylim,
+                       power = power, total = total, resource = resource,
+                       background = background, highlight = highlight,
+                       return_data = return_data)
+    return(ps)
+  } else {
+    ps <- plot_spectra(object, n = object@initial_n,
+                       n_pp = object@initial_n_pp,
+                       species = species, wlim = wlim, ylim = ylim,
+                       power = power, total = total, resource = resource,
+                       background = background, highlight = highlight,
+                       return_data = return_data)
+    return(ps)
+  }
+}
 
 
+plot_spectra <- function(params, n, n_pp,
+                         species, wlim, ylim, power,
+                         total, resource, background,
+                         highlight, return_data) {
+  params <- validParams(params)
+  if (is.na(wlim[1])) {
+    wlim[1] <- min(params@w) / 100
+  }
+  if (is.na(wlim[2])) {
+    wlim[2] <- max(params@w_full)
+  }
+  # Need to keep species in order for legend
+  species_levels <- c(dimnames(params@initial_n)$sp,
+                      "Background", "Resource", "Total")
+  if (total) {
+    # Calculate total community abundance
+    fish_idx <- (length(params@w_full) - length(params@w) + 1):length(params@w_full)
+    total_n <- n_pp
+    total_n[fish_idx] <- total_n[fish_idx] + colSums(n)
+    total_n <- total_n * params@w_full^power
+  }
+  species <- valid_species_arg(params, species)
+  # Deal with power argument
+  if (power %in% c(0, 1, 2)) {
+    y_label <- c("Number density [1/g]", "Biomass density",
+                 "Biomass density [g]")[power + 1]
+  } else {
+    y_label <- paste0("Number density * w^", power)
+  }
+  n <- sweep(n, 2, params@w^power, "*")
+  # Select only the desired species
+  spec_n <- n[as.character(dimnames(n)[[1]]) %in% species, , drop = FALSE]
+  # Make data.frame for plot
+  plot_dat <- data.frame(value = c(spec_n),
+                         # ordering of factor is important for legend
+                         Species = factor(dimnames(spec_n)[[1]],
+                                          levels = species_levels),
+                         w = rep(params@w,
+                                 each = dim(spec_n)[[1]]))
+  if (resource) {
+    resource_sel <- (params@w_full >= wlim[1]) &
+      (params@w_full <= wlim[2])
+    # Do we have any resource to plot?
+    if (sum(resource_sel) > 0) {
+      w_resource <- params@w_full[resource_sel]
+      plank_n <- n_pp[resource_sel] * w_resource^power
+      plot_dat <- rbind(plot_dat,
+                        data.frame(value = c(plank_n),
+                                   Species = "Resource",
+                                   w = w_resource))
+    }
+  }
+  if (total) {
+    plot_dat <- rbind(plot_dat,
+                      data.frame(value = c(total_n),
+                                 Species = "Total",
+                                 w = params@w_full))
+  }
+  # lop off 0s and apply wlim
+  plot_dat <- plot_dat[(plot_dat$value > 0) &
+                         (plot_dat$w >= wlim[1]) &
+                         (plot_dat$w <= wlim[2]), ]
+  # Impose ylim
+  if (!is.na(ylim[2])) {
+    plot_dat <- plot_dat[plot_dat$value <= ylim[2], ]
+  }
+  if (is.na(ylim[1])) {
+    ylim[1] <- 1e-20
+  }
+  plot_dat <- plot_dat[plot_dat$value > ylim[1], ]
+  # Create plot
+  p <- ggplot(plot_dat, aes(x = w, y = value)) +
+    scale_x_continuous(name = "Size [g]", trans = "log10",
+                       breaks = log_breaks()) +
+    scale_y_continuous(name = y_label, trans = "log10",
+                       breaks = log_breaks()) +
+    scale_colour_manual(values = params@linecolour) +
+    scale_linetype_manual(values = params@linetype)
+  if (background) {
+    back_n <- n[is.na(params@A), , drop = FALSE]
+    plot_back <- data.frame(value = c(back_n),
+                            Species = as.factor(dimnames(back_n)[[1]]),
+                            w = rep(params@w,
+                                    each = dim(back_n)[[1]]))
+    # lop off 0s and apply wlim
+    plot_back <- plot_back[(plot_back$value > 0) &
+                             (plot_back$w >= wlim[1]) &
+                             (plot_back$w <= wlim[2]), ]
+    # Impose ylim
+    if (!is.na(ylim[2])) {
+      plot_back <- plot_back[plot_back$value <= ylim[2], ]
+    }
+    plot_back <- plot_back[plot_back$value > ylim[1], ]
+    if (nrow(plot_back) > 0) {
+      # Add background species
+      p <- p +
+        geom_line(aes(group = Species),
+                  colour = params@linecolour["Background"],
+                  linetype = params@linetype["Background"],
+                  data = plot_back)
+    }
+  }
+  linesize <- rep(0.8, length(params@linetype))
+  names(linesize) <- names(params@linetype)
+  linesize[highlight] <- 1.6
+  p <- p + scale_size_manual(values = linesize) +
+    geom_line(aes(colour = Species, linetype = Species, size = Species))
+  if (return_data) return(list(plot_dat, plot_back)) else return(p)
+}
+
+plotPredMort <- function(object, species = NULL,
+                         time_range, all.sizes = FALSE,
+                         highlight = NULL, return_data = FALSE,
+                         ...) {
+  if (is(object, "MizerSim")) {
+    if (missing(time_range)) {
+      time_range  <- max(as.numeric(dimnames(object@n)$time))
+    }
+    params <- object@params
+  } else {
+    params <- validParams(object)
+  }
+  pred_mort <- getPredMort(object, time_range = time_range, drop = FALSE)
+  # If a time range was returned, average over it
+  if (length(dim(pred_mort)) == 3) {
+    pred_mort <- apply(pred_mort, c(2, 3), mean)
+  }
+
+  species <- valid_species_arg(params, species)
+  # Need to keep species in order for legend
+  species_levels <- c(as.character(params@species_params$species),
+                      "Background", "Resource", "Total")
+  pred_mort <- pred_mort[as.character(dimnames(pred_mort)[[1]]) %in% species, , drop = FALSE]
+  plot_dat <- data.frame(value = c(pred_mort),
+                         Species = factor(dimnames(pred_mort)[[1]],
+                                          levels = species_levels),
+                         w = rep(params@w, each = length(species)))
+
+  if (!all.sizes) {
+    # Remove feeding level for sizes outside a species' size range
+    for (sp in species) {
+      plot_dat$value[plot_dat$Species == sp &
+                       (plot_dat$w < params@species_params[sp, "w_min"] |
+                          plot_dat$w > params@species_params[sp, "w_inf"])] <- NA
+    }
+    plot_dat <- plot_dat[complete.cases(plot_dat), ]
+  }
+
+  p <- ggplot(plot_dat) +
+    geom_line(aes(x = w, y = value, colour = Species,
+                  linetype = Species, size = Species))
+
+  linesize <- rep(0.8, length(params@linetype))
+  names(linesize) <- names(params@linetype)
+  linesize[highlight] <- 1.6
+  p <- p +
+    scale_x_continuous(name = "Size [g]", trans = "log10") +
+    scale_y_continuous(name = "Predation mortality [1/year]",
+                       limits = c(0, max(plot_dat$value))) +
+    scale_colour_manual(values = params@linecolour) +
+    scale_linetype_manual(values = params@linetype) +
+    scale_size_manual(values = linesize)
+  if (return_data) return(plot_dat) else return(p)
+}
+
+plotFMort <- function(object, species = NULL,
+                      time_range, all.sizes = FALSE,
+                      highlight = NULL, return_data = FALSE,
+                      ...) {
+  if (is(object, "MizerSim")) {
+    if (missing(time_range)) {
+      time_range  <- max(as.numeric(dimnames(object@n)$time))
+    }
+    params <- object@params
+  } else {
+    params <- validParams(object)
+  }
+  f <- getFMort(object, time_range = time_range, drop = FALSE)
+  # If a time range was returned, average over it
+  if (length(dim(f)) == 3) {
+    f <- apply(f, c(2, 3), mean)
+  }
+  species <- valid_species_arg(params, species)
+  # Need to keep species in order for legend
+  species_levels <- c(as.character(params@species_params$species),
+                      "Background", "Resource", "Total")
+  f <- f[as.character(dimnames(f)[[1]]) %in% species, , drop = FALSE]
+  plot_dat <- data.frame(value = c(f),
+                         Species = factor(dimnames(f)[[1]],
+                                          levels = species_levels),
+                         w = rep(params@w, each = length(species)))
+
+  if (!all.sizes) {
+    # Remove feeding level for sizes outside a species' size range
+    for (sp in species) {
+      plot_dat$value[plot_dat$Species == sp &
+                       (plot_dat$w < params@species_params[sp, "w_min"] |
+                          plot_dat$w > params@species_params[sp, "w_inf"])] <- NA
+    }
+    plot_dat <- plot_dat[complete.cases(plot_dat), ]
+  }
+
+  linesize <- rep(0.8, length(params@linetype))
+  names(linesize) <- names(params@linetype)
+  linesize[highlight] <- 1.6
+  p <- ggplot(plot_dat) +
+    geom_line(aes(x = w, y = value, colour = Species,
+                  linetype = Species, size = Species))
+
+  p <- p +
+    scale_x_continuous(name = "Size [g]", trans = "log10") +
+    scale_y_continuous(name = "Fishing mortality [1/Year]",
+                       limits = c(0, max(plot_dat$value))) +
+    scale_colour_manual(values = params@linecolour) +
+    scale_linetype_manual(values = params@linetype) +
+    scale_size_manual(values = linesize)
+
+  if (return_data) return(plot_dat) else return(p)
+
+}
