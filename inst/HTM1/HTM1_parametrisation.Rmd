@@ -25,6 +25,17 @@ In this tutorial you will learn
 
 - Explore the model for the first time with your own data set
 
+You are encouraged to run the commands in this tutorial in your own RStudio session.
+Before you start, you should make sure that you have the latest version of the
+`mizerHowTo` package by running the command
+```{r eval = FALSE}
+devtools::install_github("sizespectrum/mizerHowTo")
+```
+You should run the above command even if you already installed the package
+before, because it is currently changing all the time and reinstalling it will 
+give you the latest version. If you happen to already have the latest version 
+then the above command will know and not bother to reinstall.
+
 
 ## Step 1 - What data are typically needed to parameterise a mizer model?
 
