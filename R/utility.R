@@ -438,7 +438,7 @@ plotPredObsYield <-function(sim, dat, returnData = FALSE){
 
   # window size
   winLim <- c(min(plot_dat$obs,plot_dat$value), max(plot_dat$obs,plot_dat$value))
-
+winLim <- c(0,max(plot_dat$obs,plot_dat$value)) # abline doesn't show anymore 18/06/2021
   p <- ggplot(plot_dat) + # plot predicted and observed yields
     geom_point(aes(x = value, y = obs, color = Species, size = Species)) +
     ggrepel::geom_text_repel(aes(x = value, y = obs, label = Species), hjust = 0, nudge_x = 0.05)+
