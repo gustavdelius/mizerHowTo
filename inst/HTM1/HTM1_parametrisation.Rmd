@@ -9,9 +9,6 @@ place: Hobart, Australia
 always_allow_html: yes
 ---
 
-```{r setup, include=FALSE}
-library(mizerHowTo)
-```
 
 # Beginner level tutorial - how to parameterise a Mizer model
 
@@ -36,6 +33,11 @@ before, because it is currently changing all the time and reinstalling it will
 give you the latest version. If you happen to already have the latest version 
 then the above command will know and not bother to reinstall.
 
+Now you can load the package with
+```{r message = FALSE}
+library(mizerHowTo)
+```
+That will print some messages that you can ignore.
 
 ## Step 1 - What data are typically needed to parameterise a mizer model?
 
