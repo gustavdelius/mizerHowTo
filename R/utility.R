@@ -6,7 +6,7 @@
 #' @param tutorial_name The name of the tutorial. Accepted values are "HTM1"
 #' and "HTM2". Default is "HTM1".
 #' @param extension The extension of the tutorial. Accepted values are "html"
-#' and "Rmd". Default is "html".
+#' "website" (direct to sizespectrum.org) and "Rmd". Default is "html".
 #' @export
 tutorial <- function(tutorial_name = "HTM1", extension = "html") {
   switch (tutorial_name,
@@ -16,7 +16,9 @@ tutorial <- function(tutorial_name = "HTM1", extension = "html") {
               rstudioapi::navigateToFile(
                 system.file("HTM1", "HTM1_parametrisation.Rmd",
                             package = "mizerHowTo"))
-            } else if (extension == "html") browseURL("https://sizespectrum.org/mizerHowTo/articles/HTM1_parametrisation.html")
+            } else if (extension == "html") browseURL(system.file("HTM1", "HTM1_parametrisation.html",
+                                                                   package = "mizerHowTo"))
+            else if (extension == "website") browseURL("https://sizespectrum.org/mizerHowTo/articles/HTM1_parametrisation.html")
           },
           "HTM2" = {
             if(extension == "Rmd")
@@ -24,7 +26,9 @@ tutorial <- function(tutorial_name = "HTM1", extension = "html") {
               rstudioapi::navigateToFile(
                 system.file("HTM2", "HTM2_timeAveraged_calibration.Rmd",
                             package = "mizerHowTo"))
-            } else if (extension == "html") browseURL("https://sizespectrum.org/mizerHowTo/articles/HTM2_timeAveraged_calibration.html")
+            } else if (extension == "html") browseURL(system.file("HTM2", "HTM2_timeAveraged_calibration.html",
+                                                                  package = "mizerHowTo"))
+            else if (extension == "website") browseURL("https://sizespectrum.org/mizerHowTo/articles/HTM2_timeAveraged_calibration.html")
           },
           {print("Something went wrong")}
   )
