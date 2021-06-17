@@ -41,6 +41,8 @@ Let's read in the saved calibrated parameters of the North sea model stored in t
 #read saved sim object from previous example
 sim <- readRDS("optim_para_sim.RDS")
 params<-sim@params
+#using a saved model, different erepro and Rmax values compared to HTM2
+
 #sim <- HTM2_sim_optim3
 #params<-sim@params
 
