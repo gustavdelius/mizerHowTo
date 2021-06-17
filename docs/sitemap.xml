@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://sizespectrum.org/mizerHowTo/404.html</loc>
+  </url>
+  <url>
+    <loc>https://sizespectrum.org/mizerHowTo/articles/HTM1_parametrisation.html</loc>
+  </url>
+  <url>
+    <loc>https://sizespectrum.org/mizerHowTo/articles/HTM2_timeAveraged_calibration.html</loc>
+  </url>
+  <url>
+    <loc>https://sizespectrum.org/mizerHowTo/articles/HTM3_timeSeries_calibration.html</loc>
+  </url>
+  <url>
+    <loc>https://sizespectrum.org/mizerHowTo/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>https://sizespectrum.org/mizerHowTo/authors.html</loc>
+  </url>
+  <url>
     <loc>https://sizespectrum.org/mizerHowTo/index.html</loc>
   </url>
   <url>
@@ -37,6 +55,9 @@
     <loc>https://sizespectrum.org/mizerHowTo/reference/catchAvg.html</loc>
   </url>
   <url>
+    <loc>https://sizespectrum.org/mizerHowTo/reference/g_legend.html</loc>
+  </url>
+  <url>
     <loc>https://sizespectrum.org/mizerHowTo/reference/getBiomassFrame2.html</loc>
   </url>
   <url>
@@ -44,6 +65,9 @@
   </url>
   <url>
     <loc>https://sizespectrum.org/mizerHowTo/reference/getError.html</loc>
+  </url>
+  <url>
+    <loc>https://sizespectrum.org/mizerHowTo/reference/index.html</loc>
   </url>
   <url>
     <loc>https://sizespectrum.org/mizerHowTo/reference/interNS.html</loc>
