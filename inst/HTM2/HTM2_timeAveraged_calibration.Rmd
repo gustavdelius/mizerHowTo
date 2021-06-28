@@ -159,7 +159,7 @@ Decreasing `erepro` is going to move the $F_{msy}$ towards lower effort. Until n
 ```{r step 2 - rshiny-fmsy, eval = F, echo = T}
 shiny_fmsy(params = HTM2_sim_optim1@params, dat = HTM2_Fmsy2) 
 ```
-> Note: the shiny app only calculate the $F_{msy}$ of one species at a time (for speed reasons) and the final results may not be exactly the same as calculating the $F_{msy}$ for every species together (as shown below)
+> Note: the shiny app only calculates the $F_{msy}$ of one species at a time (for speed reasons) and the final results may not be exactly the same as calculating the $F_{msy}$ for every species together (as shown below)
 
 We have tweaked `erepro` per species using the shiny app, let's add these new values in the `mizerParams` object and run a simulation again. The values used in the block below are specific to the North Sea and will differ from any other ecosystem.
 
