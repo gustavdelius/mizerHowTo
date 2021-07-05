@@ -41,7 +41,7 @@ shiny_erepro <- function(input, dat = NULL) {
 
     output$plot1 <- renderPlot({
       # set up params using values given, need check and change parameter values so units work in days units
-      params_shiny@species_params$erepro <- rep(10^input$erepro,12)
+      params_shiny@species_params$erepro <- rep(10^input$erepro,length(params_shiny@species_params$erepro))
       # params@species_params$Rmax <- rep(10^input$Rmax,12)
       params_shiny <- setParams(params_shiny)#,kappa=10^input$kappa)
       # run without fishing
@@ -53,7 +53,7 @@ shiny_erepro <- function(input, dat = NULL) {
     {
     output$plot2 <- renderPlot({
       # set up params using values given, need check and change parameter values so units work in days units
-      params_shiny@species_params$erepro <- rep(10^input$erepro,12)
+      params_shiny@species_params$erepro <- rep(10^input$erepro,length(params_shiny@species_params$erepro))
       # params@species_params$Rmax <- rep(10^input$Rmax,12)
       params_shiny <- setParams(params_shiny)#,kappa=10^input$kappa)
       # run without fishing

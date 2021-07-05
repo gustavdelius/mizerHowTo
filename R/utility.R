@@ -63,7 +63,7 @@ g_legend<-function(a.gplot){
 getError <- function(vary,params,dat,data_type="catch", tol = 0.1,timetorun=10)
 {
   #env$params@species_params$R_max[]<-10^vary[1:12]
-  params@species_params$R_max[]<-10^vary[1:12]
+  params@species_params$R_max[]<-10^vary[1:length(params@species_params$R_max)]
 
   params <- setParams(params)
   # run to steady state and update params
