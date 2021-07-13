@@ -80,7 +80,7 @@ clusterEvalQ(cl, {
   library(mizerExperimental)
   library(optimParallel)
 })
-optim_result <- optimParallel::optimParallel(par=vary,getError,params=params_optim, dat = catchAvg$Catch_1419_tonnes, method   ="L-BFGS-B",lower=c(rep(3,12)),upper= c(rep(15,12)),
+optim_result <- optimParallel::optimParallel(par=vary,getError,params=params_optim, dat = catchAvg$Catch_1419_tonnes, method   ="L-BFGS-B", lower=c(rep(3,dim(params_optim@species_params)[1])), upper= c(rep(15,dim(params_optim@species_params)[1])),
                             parallel=list(loginfo=TRUE, forward=TRUE))
 stopCluster(cl)
 # saveRDS(optim_result,"optimParallel_Rmax1.RDS")
@@ -226,7 +226,7 @@ clusterEvalQ(cl, {
   library(optimParallel)
 })
 optim_loop <-optimParallel::optimParallel(par=vary,getError,params=params_calibration, dat = catchAvg$Catch_1419_tonnes, 
-                             method   ="L-BFGS-B",lower=c(rep(3,12)),upper= c(rep(15,12)),
+                             method   ="L-BFGS-B", lower=c(rep(3,dim(params_optim@species_params)[1])), upper= c(rep(15,dim(params_optim@species_params)[1])),
                             parallel=list(loginfo=TRUE, forward=TRUE))
 stopCluster(cl)
 
