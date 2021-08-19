@@ -16,7 +16,9 @@ sim <- readRDS("data/HTM0_sim1.RDS")
 
 ### Example #1. Species Collapse and Recovery in a Heavily Fished Multispecies System
 
-In this example  we will read in a calibrated model for the North Sea, which consists of 12 interacting species and a backgorund resource. All species are predators and prey since they feed according to size-based rules and they encounter each  other.
+In this example  we will read in a calibrated model for the North Sea, which consists of 12 interacting species and a background resource. All species are predators and prey since they feed according to size-based rules and they encounter each  other.
+
+All species have been heavily fished over the past 100+ years. Here we  assess whether some species are collapsed relative to their unfished states. We examine possible  trajectories of recovery.
 
 ```{r gear set-up, echo = F}
   # make one gear per species so we can vary the effort per species
