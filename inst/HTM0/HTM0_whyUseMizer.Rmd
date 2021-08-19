@@ -4,25 +4,19 @@ author: RF
 output: html_document
 ---
 
-
-Mizer is a tool that can simulate a dynamic size spectrum in an marine ecosystem, subject to fishing pressure. 
-Multiple fishing gears can be defined and fishing mortality can change through time allowing to explore a range of fishing patterns / exploitation strategies and their effect on the marine ecosystem.
+Mizer is a tool that can be used to simulate a dynamic size spectrum in an marine ecosystem, subject to changes through time, such as fishing pressure. Multiple interacting species and fishing gears can be defined allowing for a range of fisheries management strategy scenarios, and their ecosystem impacts, to be tested.
 
 Below are some examples of what one can do with a calibrated Mizer model.
 
 ```{r set-up, echo = F,message=F, warning=F}
 library(mizerHowTo)
-sim <- HTM2_sim_optim3
+sim <- readRDS("data/HTM0_sim1.RDS")
 
 ```
 
-### The Nort Sea ecosystem
+### Example #1. Species Collapse and Recovery in a Heavily Fished Multispecies System
 
-![Figure 3: summary diagnostic](../paper/tempSummaryAnnoted.png)
-
-### Varying the fisheries effort
-
-The effort directly scales the fishing mortality rate.
+In this example  we will read in a calibrated model for the North Sea, which consists of 12 interacting species and a backgorund resource. All species are predators and prey since they feed according to size-based rules and they encounter each  other.
 
 ```{r gear set-up, echo = F}
   # make one gear per species so we can vary the effort per species
@@ -36,6 +30,8 @@ The effort directly scales the fishing mortality rate.
   gear_params(sim@params) <- gear
   
 ```
+
+### Example #2. Maintaining Fisheries Yields in a Changing Environment
 
 
 ```{r varying effort, eval = T, echo = F, warning=F}
