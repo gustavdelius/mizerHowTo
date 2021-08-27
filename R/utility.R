@@ -811,9 +811,9 @@ plotCalibration <- function(sim, catch_dat = NULL, stage = 1, wlim = c(.1,NA), p
               scale_y_continuous(name = "Biomass density" ,trans = "log10", breaks = log_breaks()) +
               scale_colour_manual(values = sim@params@linecolour) +
               scale_linetype_manual(values = sim@params@linetype) +
-              theme(axis.title.x=element_blank(),
-                    axis.text.x=element_blank(),
-                    axis.ticks.x=element_blank(),
+              theme(#axis.title.x=element_blank(),
+                    #axis.text.x=element_blank(),
+                    #axis.ticks.x=element_blank(),
                     text = element_text(size=font_size),
                     panel.background = element_blank(),
                     panel.grid.minor = element_line(color = "gray"),
