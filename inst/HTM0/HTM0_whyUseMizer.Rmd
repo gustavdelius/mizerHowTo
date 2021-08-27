@@ -137,7 +137,7 @@ The species' maximum fishing mortality rates (which we call for convenience effo
 We can the values directly like this:
 
 ```{r}
-sim@effort["2018",]
+current_effort<-sim@effort["2018",]
 ```
 
 
@@ -148,9 +148,12 @@ To do this need to work with the effort array (time x gear) to enable changes in
 
 
 ```{r}
-select_species="Sprat"
-proj_effort<-sim@effort
+sim_status_quo<-project(params,initial_n = sim@n["2018",,], initial_n_pp = sim@n_pp["2018",],effort=current_effort,t_max = 50)
+
+proj_effort<-sim_status_quo@effort
+
 target<-0.2
+select_species="Sprat"
 
 # reach target by 10 years
 proj_effort[1:10,select_species]<-seq(from = proj_effort[1,select_species], to = target, length = 10)
@@ -163,7 +166,7 @@ proj_effort[,select_species]
 
 # run the simulation forward, using the 2018 abundances as initial values
 
-sim_scen<-project(params,initial_n = sim@n["2018",,], initial_n_pp = sim@n_pp["2018",],effort=proj_effort)
+sim_scen<-project(params,initial_n = sim@n["2018",,], initial_n_pp = sim@n_pp["2018",],effort=proj_effort,t_max = 50)
 
 # plot change in biomass relative to 2018 values
 
