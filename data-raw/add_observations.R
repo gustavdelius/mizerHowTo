@@ -8,7 +8,7 @@ library(dplyr)
 nsParams <- nsParams %>%
   left_join(time_averaged_catches, by = "species") %>%
   left_join(time_averaged_SSB, by = "species") %>%
-  rename(catch_observed = Catch_1419_tonnes,
+  rename(yield_observed = Catch_1419_tonnes,
          biomass_observed = SSB_1419)
 nsParams$cutoff_size <- sp$w_mat
 

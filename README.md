@@ -16,6 +16,8 @@ Finally, load the newly installed package with
 To display any tutorial, use the `tutorial()` function.
 
 Available tutorials are
+  
+- HTM0: Examples on the use of Mizer
 
 - HTM1: How to parametrise a Mizer model
 

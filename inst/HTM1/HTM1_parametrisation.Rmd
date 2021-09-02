@@ -46,7 +46,7 @@ That will print some messages that you can ignore.
 
 ```{r step 1 - Parameter description table, echo = F}
 
-param_descrition <- data.frame("parameter" = c("w_inf","w_mat","beta","sigma","R_max","k_vb","l25","l50",
+param_description <- data.frame("parameter" = c("w_inf","w_mat","beta","sigma","R_max","k_vb","l25","l50",
                                                "a","b","catchability","h","k","ks","z0","gamma","w_mat25","erepro"),
                                "description" = c("asymptotic weigth",
                                                  "maturation weight (determines when 50% of the population has matured using a sigmoid function)",
@@ -60,7 +60,7 @@ param_descrition <- data.frame("parameter" = c("w_inf","w_mat","beta","sigma","R
                                                  "weight at which 25% of individuals are mature","reproductive output scalar")
 )
 
-knitr::kable(param_descrition, caption = "parameters' description")
+knitr::kable(param_description, caption = "parameters' description")
 
 ```
 
@@ -218,7 +218,7 @@ params_uncalibrated@linecolour[1:12] <- viridis::viridis(dim(params_uncalibrated
 ```{r step 2 - mizerParams table NS, echo = F}
 knitr::kable(params_uncalibrated@species_params[,-which(colnames(params_uncalibrated@species_params) %in% 
                                              c("sel_func","gear","interaction_resource","pred_kernel_type","m","alpha","n","p","q",
-                                               "w_min","w_mat25","k","catch_observed","biomass_observed","cutoff_size"))],row.names = F, caption = "mizerParams object")
+                                               "w_min","w_mat25","k","yield_observed","biomass_observed","cutoff_size"))],row.names = F, caption = "mizerParams object")
 
 ```
 

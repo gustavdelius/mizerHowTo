@@ -153,7 +153,6 @@ ui=fluidPage(
     )
   )
 
-)
 
 server = function(input, output) {
   output$toggle_gamma <- renderUI({

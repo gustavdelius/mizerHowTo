@@ -35,7 +35,9 @@ Imports:
     viridis,
     shiny,
     shinyWidgets,
-    rstudioapi
+    rstudioapi,
+    ggpubr,
+    flextable
 Suggests:
     tictoc,
     rmarkdown
@@ -44,11 +46,12 @@ Collate:
     'utility.R'
     'data.R'
     'mizerHowTo-package.R'
+    'calibration_functions.R'
 Remotes:  
     sizespectrum/mizerExperimental
 RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
-URL: https://sizespectrum/mizerHowTo
-BugReports: https://github.com/sizespectrum/mizerHowTo/issues
+URL: https://sizespectrum.org/mizerHowTo
+BugReports: https://github.com/sizespectrum.org/mizerHowTo/issues
 Language: en-GB
 VignetteBuilder: knitr

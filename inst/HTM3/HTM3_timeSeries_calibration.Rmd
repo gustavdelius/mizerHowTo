@@ -31,7 +31,6 @@ Preliminary set up again... if needed.
 ```{r}
 #get required packages and functions
 library(mizerHowTo)
-source("calibration_functions.R")
 
 ```
 
