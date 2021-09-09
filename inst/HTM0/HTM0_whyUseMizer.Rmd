@@ -10,17 +10,19 @@ Below we explore some examples of what can be done using a previously calibrated
 First, we load the necessary packages.
 
 ```{r set-up, echo = F,message=F, warning=F}
+remotes::install_github("sizespectrum/mizerHowTo")
 library(mizerHowTo)
 remotes::install_github("sizespectrum/mizerExperimental")
 library(mizerExperimental)
 library(tidyverse)
 library(ggpubr)
 # Romain and Gustav: can the be a short cut to the sim object that I calibrated? Ad call it HTM0_sim?
-sim<-readRDS("~/Dropbox/HOW TO mizer/Course/HowTo/inst/HTM3/sim_opt_time.RDS")
+sim <- readRDS(system.file("HTM3/sim_opt_time.RDS", package = "mizerHowTo"))
 # also I need to rerun the calibration and post blog before we do the session!
 # upgrade params
-params<-upgradeParams(sim@params)
-effort<-sim@effort
+sim <- upgradeSim(sim)
+params <- getParams(sim)
+effort <- getEffort(sim)
 ```
 
 ### Species Collapse and Recovery in a Heavily Fished Multispecies System
@@ -33,9 +35,9 @@ You can take a look at how the modelled species biomasses change through time by
 
 ```{r}
 # species' biomass through time
-plotlyBiomass(sim,start_time = 1950,end_time = 2018)
+plotlyBiomass(sim, start_time = 1950, end_time = 2018)
 # look at size spectra in final 5 years
-plotSpectra(sim,time_range = c(2015:2018),power=2)
+plotSpectra(sim, time_range = c(2015:2018), power = 2)
 ```
 
 ### Examining changes in the community relative to an unfished state 
@@ -43,7 +45,7 @@ plotSpectra(sim,time_range = c(2015:2018),power=2)
 To be able to examine any changes in the community relative to an unfished state we can re-set effort = 0 and calculate the steady state. 
 
 ```{r, eval = T, echo = F, warning=F}
-sim0 <- projectToSteady(sim@params, effort = 0, return_sim = T,t_max=100)
+sim0 <- projectToSteady(params, effort = 0, return_sim = TRUE, t_max = 200)
 plotlyBiomass(sim0)
 #  or could set the initial N to this state, would be better? better to set  this up in advance so we dont have to do it here?
 ```
@@ -51,21 +53,21 @@ plotlyBiomass(sim0)
 We can compare the current  size  spectra (averaged over 2015-2019) to the unfished size spectra to assess whether there is any evidence of a size-structured trophic cascade due to fishing.
 
 ```{r , code_folding=TRUE, eval = T, echo = F, warning=F}
-relative_n<-melt(sim@n["2019",,]/sim0@n[dim(sim0@n)[1],,])
+relative_n <- melt(finalN(sim0) / finalN(sim))
 
-plot_relative_n<-ggplot(relative_n) + 
-geom_line(aes(x = w, y = value, colour = sp)) +
-scale_y_continuous(trans = "log10") +
-scale_x_continuous(trans = "log10") +
-geom_hline(yintercept = 1, linetype=1, colour="dark grey", size=0.75) + 
-theme_pubr() +
-labs(y="Relative Abundance",x="Weight [g]")  
+plot_relative_n <- ggplot(relative_n) + 
+    geom_line(aes(x = w, y = value, colour = sp)) +
+    scale_y_continuous(trans = "log10") +
+    scale_x_continuous(trans = "log10") +
+    geom_hline(yintercept = 1, colour = "dark grey", size = 0.75) + 
+    theme_pubr() +
+    labs(y = "Relative Abundance", x = "Weight [g]")  
 
 plot_relative_n
 
 ```
 
-Here we can see the effect of the reduction in large sized individuals of heavily fished on the other sizes and species in the model, relative to the uifished steady state. 
+Here we can see the effect of the reduction in large sized individuals of heavily fished species on the other sizes and species in the model, relative to the unfished steady state. 
 
 The abundance of some (but not all) of the smaller to medium sizes of prey are a lot higher  when their larger predators are removed (note the logarithmic scale).
 
@@ -77,108 +79,112 @@ We can do the same with Biomass to see when, if any, of the species collapse. Fo
 
 # select the species  (or should we set this up with all species, like plotlyBiomass, should we make these plots in built functions?)
 
-B0<-getBiomass(sim0)[dim(sim0@n)[1],]
-Brel<-melt(sweep(getBiomass(sim),2, B0,"/"))
+B0 <- getBiomass(sim0)[idxFinalT(sim0), ]
+Brel <- melt(sweep(getBiomass(sim), 2, B0, "/"))
 
-select_species="Sprat"
+select_species = "Sprat"
 
 Brel_select <- Brel %>%
   filter(sp == select_species & time >= 1950) 
 
 
-plot_Brel<-ggplot(Brel_select)+ geom_line(aes(x=time,y=value)) + 
-theme_pubr() + 
-geom_hline(yintercept = 0.1, linetype=1, colour="red", size=0.75) +
-  geom_hline(yintercept = 0.5, linetype=1, colour="steel blue", size=0.75) +
-labs(x="",y="Relative Biomass") +
-scale_y_continuous(limits = c(0,max(Brel_select$value)))
+plot_Brel <- ggplot(Brel_select) +
+    geom_line(aes(x = time, y = value)) +
+    theme_pubr() +
+    geom_hline(yintercept = 0.1, colour = "red", size = 0.75) +
+    geom_hline( yintercept = 0.5, colour = "steel blue", size = 0.75 ) +
+    labs(x = "", y = "Relative Biomass") +
+    scale_y_continuous(limits = c(0, max(Brel_select$value)))
 
 plot_Brel<- plot_Brel  +
-annotate("text",x = 1951, y = 0.1+0.05, label = "Blim",color="red")+
-annotate("text",x = 1951, y = 0.5+0.05, label = "Bmsy",color="steel blue")+
-annotate("text",x = 2015, y = max(Brel_select$value), label = select_species,color="black") 
+    annotate("text", x = 1951, y = 0.1+0.05, label = "Blim", color = "red") +
+    annotate("text", x = 1951, y = 0.5+0.05, label = "Bmsy", color = "steel blue") +
+    annotate("text", x = 2015, y = max(Brel_select$value), 
+             label = select_species, color = "black") 
 
 plot_Brel
 
 # which years < 0.1 B_unfished
 
 Brel_select <- Brel %>%
-  filter(sp == "Sprat" & time >= 1950) %>%
-  mutate(collapsed = value < 0.1)
+    filter(sp == "Sprat" & time >= 1950) %>%
+    mutate(collapsed = value < 0.1)
 
 ggplot(Brel_select, aes(x = time, y = value, fill = collapsed)) +
-  geom_col(position = "identity") +
-  geom_hline(yintercept = 0.1, linetype=1, colour="dark grey", size=0.75) +
-  scale_fill_manual(values = alpha(c("blue", "red"), .3)) +
-  theme_pubr()
+    geom_col(position = "identity") +
+    geom_hline(yintercept = 0.1, colour = "dark grey", size = 0.75) +
+    scale_fill_manual(values = alpha(c("blue", "red"), .3)) +
+    theme_pubr()
 
 ```
 
 
 ### Projecting future recovery scenarios 
 
-We may now wish to explore the potential recovery the larger species and sizes in the system. To do this we set  up another scenario, where the model starts with the last time step of the fished scenario.
+We may now wish to explore the potential recovery of the larger species and sizes in the system. To do this we set  up another scenario, where the model starts with the last time step of the fished scenario.
 
 First let's take a look at what the model has used in the historical period (from ICES stock assessments).
 
 ```{r}
-effort<-melt(sim@effort)  %>% filter(time >= 1980)
+effort <- melt(getEffort(sim))  %>% filter(time >= 1980)
 
-plot_effort<-ggplot(effort) + 
-geom_line(aes(x = time, y = value, colour = gear))+ 
-theme_pubr() +
-labs(y="Effort",x="") 
+plot_effort <- ggplot(effort) + 
+    geom_line(aes(x = time, y = value, colour = gear)) + 
+    theme_pubr() +
+    labs(y = "Effort", x = "") 
 
 plot_effort
 ```
 
 The species' maximum fishing mortality rates (which we call for convenience effort) for Cod and Saithe have declined but are not as low as what would be in line with single-species "Fmsy" (a reference level of fishing  deemed sustainable from  single-species stock assessements) and the fishing mortality rate for Sprat and Dab is very high. 
 
-We can the values directly like this:
+The effort values in 2018 were
 
 ```{r}
-current_effort<-sim@effort["2018",]
+(current_effort <- getEffort(sim)["2018", ])
 ```
 
 
 Let's start a new simulation that begins with the effort from 2018 and projects forward for 50 years.
 We will apply a linear reduction in effort for a selected species to a target value (here assumed for simplicity to be 0.2 with effort expressed in terms of the species' fishing mortality rate for fully selected sizes).
 
-To do this need to work with the effort array (time x gear) to enable changes in effort through time, for this scenario. Here we have a 'gear' for each species, since effort in this case were annual single-species fishing mortality estimates.
+To do this we need to work with the effort array (time x gear) to enable changes in effort through time, for this scenario. Here we have a 'gear' for each species, since effort in this case were annual single-species fishing mortality estimates.
 
 
 ```{r}
-sim_status_quo<-project(params,initial_n = sim@n["2018",,], initial_n_pp = sim@n_pp["2018",],effort=current_effort,t_max = 50)
+proj_effort <- matrix(current_effort, nrow = 51, ncol = 12, byrow = TRUE)
+dimnames(proj_effort) <- list(time = 2019:2069,
+                              gear = unique(gear_params(params)$gear))
 
-proj_effort<-sim_status_quo@effort
-
-target<-0.2
-select_species="Sprat"
+target <- 0.2
+sp_idx <- which(species_params(params)$species == "Sprat")
 
 # reach target by 10 years
-proj_effort[1:10,select_species]<-seq(from = proj_effort[1,select_species], to = target, length = 10)
+proj_effort[1:10, select_species] <- 
+    seq(from = proj_effort[1, select_species], to = target, length = 10)
 
 # then hold at target
-proj_effort[11:51,select_species]<-target
+proj_effort[11:51, select_species] <- target
 
 # check it
-proj_effort[,select_species]
+proj_effort[, select_species]
 
 # run the simulation forward, using the 2018 abundances as initial values
-
-sim_scen<-project(params,initial_n = sim@n["2018",,], initial_n_pp = sim@n_pp["2018",],effort=proj_effort,t_max = 50)
+params_status_quo <- setInitialValues(params, sim)
+sim_scen <- project(params_status_quo, effort = proj_effort, t_max = 50)
 
 # plot change in biomass relative to 2018 values
 
 plotBiomass(sim_scen)
 
-B_current<-getBiomass(sim_scen)[1,]
+B_current <- getBiomass(sim_scen)[1, ]
 
-Brel_scen<-melt(sweep(getBiomass(sim_scen),2, B_current,"/"))
+Brel_scen <- melt(sweep(getBiomass(sim_scen), 2, B_current, "/"))
 
-ggplot(Brel_scen)+ geom_line(aes(x=time,y=value,color=sp)) + 
-geom_hline(yintercept = 1, linetype=1, colour="grey", size=0.75) +
-theme_pubr()
+ggplot(Brel_scen) + 
+    geom_line(aes(x=time,y=value,color=sp)) +
+    geom_hline(yintercept = 1, colour = "grey", size = 0.75) +
+    theme_pubr()
 
 ```
 
@@ -188,17 +194,17 @@ Are any species collapsed still?
 
 ```{r}
 
-Brel_ref<-melt(sweep(getBiomass(sim_scen),2, B0,"/"))
+Brel_ref <- melt(sweep(getBiomass(sim_scen), 2, B0, "/"))
 
 Brel_ref <- Brel_scen  %>% mutate(collapsed = value < 0.1)
 
 ggplot(Brel_ref, aes(x = time, y = value, fill = collapsed)) +
-  geom_col(position = "identity") +
-  geom_hline(yintercept = 0.1, linetype=1, colour="red", size=0.75) +
-   geom_hline(yintercept = 0.5, linetype=1, colour="dark grey", size=0.75) +
-  scale_fill_manual(values = alpha(c("blue", "red"), .3)) +
-  facet_wrap(vars(sp))+
-  theme_void()
+    geom_col(position = "identity") +
+    geom_hline(yintercept = 0.1, colour="red", size = 0.75) +
+    geom_hline(yintercept = 0.5, colour="dark grey", size = 0.75) +
+    scale_fill_manual(values = alpha(c("blue", "red"), .3)) +
+    facet_wrap(vars(sp)) +
+    theme_void()
 ```
 
 
