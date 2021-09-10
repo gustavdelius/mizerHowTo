@@ -11,12 +11,12 @@ First, we load the necessary packages.
 
 ```{r set-up, echo = F,message=F, warning=F}
 library(mizerHowTo)
-remotes::install_github("sizespectrum/mizerExperimental")
+# remotes::install_github("sizespectrum/mizerExperimental")
 library(mizerExperimental)
 library(tidyverse)
 library(ggpubr)
 # Romain and Gustav: can the be a short cut to the sim object that I calibrated? Ad call it HTM0_sim?
-sim<-readRDS("~/Dropbox/HOW TO mizer/Course/HowTo/inst/HTM3/sim_opt_time.RDS")
+sim<-readRDS("../HTM3/sim_opt_time.RDS")
 # also I need to rerun the calibration and post blog before we do the session!
 # upgrade params
 params<-upgradeParams(sim@params)
@@ -25,9 +25,9 @@ effort<-sim@effort
 
 ### Species Collapse and Recovery in a Heavily Fished Multispecies System
 
-In this example  we will read in a calibrated model for the North Sea, which consists of 12 interacting species and a background resource. All species are predators and prey since they feed according to size-based rules and they encounter each  other. 
+In this example  we will read in a calibrated model for the North Sea, which consists of 12 interacting species and a background resource. All species are predators and prey since they feed according to size-based rules and they encounter each  other. Fishing is applied as a logistic curve by length, matched to the maturity length $l_{50}$ of each species.
 
-More information on how this model was calibrated with historical data can be found in our "mizerHowTo" package [tutorial link HTOM3] and in this [blogpost]. 
+More information on how this model was calibrated with historical data can be found in our "mizerHowTo" package [tutorial link HTOM3] and in this [blogpost](https://blog.mizer.sizespectrum.org/posts/2021-08-20-a-5-step-recipe-for-tuning-the-model-steady-state/). 
 
 You can take a look at how the modelled species biomasses change through time by running the following:
 
@@ -35,7 +35,7 @@ You can take a look at how the modelled species biomasses change through time by
 # species' biomass through time
 plotlyBiomass(sim,start_time = 1950,end_time = 2018)
 # look at size spectra in final 5 years
-plotSpectra(sim,time_range = c(2015:2018),power=2)
+plotlySpectra(sim,time_range = c(2015:2018),power=2)
 ```
 
 ### Examining changes in the community relative to an unfished state 
@@ -48,7 +48,7 @@ plotlyBiomass(sim0)
 #  or could set the initial N to this state, would be better? better to set  this up in advance so we dont have to do it here?
 ```
 
-We can compare the current  size  spectra (averaged over 2015-2019) to the unfished size spectra to assess whether there is any evidence of a size-structured trophic cascade due to fishing.
+We can compare the current size spectra (averaged over 2015-2019) to the unfished size spectra to assess whether there is any evidence of a size-structured trophic cascade due to fishing.
 
 ```{r , code_folding=TRUE, eval = T, echo = F, warning=F}
 relative_n<-melt(sim@n["2019",,]/sim0@n[dim(sim0@n)[1],,])
