@@ -21,6 +21,11 @@ sim<-readRDS("../HTM3/sim_opt_time.RDS")
 # upgrade params
 params<-upgradeParams(sim@params)
 effort<-sim@effort
+
+# correct gear params
+params@gear_params$l25 = params@species_params$l25
+params@gear_params$l50 = params@species_params$l50 # assume the species params numbers are correct
+  
 ```
 
 ### Species Collapse and Recovery in a Heavily Fished Multispecies System
