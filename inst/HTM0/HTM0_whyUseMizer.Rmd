@@ -51,17 +51,41 @@ plotlyBiomass(sim0)
 We can compare the current size spectra (averaged over 2015-2019) to the unfished size spectra to assess whether there is any evidence of a size-structured trophic cascade due to fishing.
 
 ```{r , code_folding=TRUE, eval = T, echo = F, warning=F}
-relative_n<-melt(sim@n["2019",,]/sim0@n[dim(sim0@n)[1],,])
 
-plot_relative_n<-ggplot(relative_n) + 
-geom_line(aes(x = w, y = value, colour = sp)) +
-scale_y_continuous(trans = "log10") +
-scale_x_continuous(trans = "log10") +
-geom_hline(yintercept = 1, linetype=1, colour="dark grey", size=0.75) + 
-theme_pubr() +
-labs(y="Relative Abundance",x="Weight [g]")  
+plot_relative_biomass = function(sim0, sim1, ratio = F) {
 
-plot_relative_n
+  # assume sim0 is steady state, sim1 is some kind of variation such as fishing
+
+  fish_sim = apply(sim1@n[as.character(2015:2019),,], c(2,3), mean) # mean of last five years
+  unfish_sim = sim0@n[dim(sim0@n)[1],,] # last snapshot of steady state sim
+  
+  if (ratio == T) {
+    relative_n <- melt(fish_sim/unfish_sim) # Julia's original calculation
+  } else {
+    relative_n <- melt((fish_sim - unfish_sim) / (fish_sim + unfish_sim)) # Gustav's suggested calculation
+  }
+  
+  p <- ggplot(relative_n) + 
+    geom_line(aes(x = w, y = value, colour = sp), size = 1) +
+    scale_x_continuous(trans = "log10") +
+    theme_pubr() +
+    labs(x = "Weight [g]")  
+  
+  if (ratio == T) {
+    p = p + scale_y_continuous(trans = "log10") + 
+      geom_hline(yintercept = 1, linetype = 1, colour="dark grey", size=0.75) + 
+      labs(y="Relative abundance")  
+  } else {
+    p = p + geom_hline(yintercept = 0, linetype = 1, colour="dark grey", size=0.75) + 
+      labs(y="Relative difference")  
+  }
+  
+  print(p)
+  
+}
+
+plot_relative_biomass(sim0, sim, ratio = T)
+plot_relative_biomass(sim0, sim)
 
 ```
 
@@ -86,7 +110,7 @@ Brel_select <- Brel %>%
   filter(sp == select_species & time >= 1950) 
 
 
-plot_Brel<-ggplot(Brel_select)+ geom_line(aes(x=time,y=value)) + 
+plot_Brel<-ggplot(Brel_select)+ geom_line(aes(x=time,y=value), size = 1) + 
 theme_pubr() + 
 geom_hline(yintercept = 0.1, linetype=1, colour="red", size=0.75) +
   geom_hline(yintercept = 0.5, linetype=1, colour="steel blue", size=0.75) +
@@ -125,7 +149,7 @@ First let's take a look at what the model has used in the historical period (fro
 effort<-melt(sim@effort)  %>% filter(time >= 1980)
 
 plot_effort<-ggplot(effort) + 
-geom_line(aes(x = time, y = value, colour = gear))+ 
+geom_line(aes(x = time, y = value, colour = gear), size = 1) + 
 theme_pubr() +
 labs(y="Effort",x="") 
 
@@ -148,7 +172,7 @@ To do this need to work with the effort array (time x gear) to enable changes in
 
 
 ```{r}
-sim_status_quo<-project(params,initial_n = sim@n["2018",,], initial_n_pp = sim@n_pp["2018",],effort=current_effort,t_max = 50)
+sim_status_quo<-project(params,initial_n = sim@n["2018",,], initial_n_pp =sim@n_pp["2018",],effort=current_effort,t_max = 50)
 
 proj_effort<-sim_status_quo@effort
 
@@ -170,13 +194,13 @@ sim_scen<-project(params,initial_n = sim@n["2018",,], initial_n_pp = sim@n_pp["2
 
 # plot change in biomass relative to 2018 values
 
-plotBiomass(sim_scen)
+plotlyBiomass(sim_scen)
 
 B_current<-getBiomass(sim_scen)[1,]
 
 Brel_scen<-melt(sweep(getBiomass(sim_scen),2, B_current,"/"))
 
-ggplot(Brel_scen)+ geom_line(aes(x=time,y=value,color=sp)) + 
+ggplot(Brel_scen)+ geom_line(aes(x=time,y=value,color=sp), size = 1) + 
 geom_hline(yintercept = 1, linetype=1, colour="grey", size=0.75) +
 theme_pubr()
 
