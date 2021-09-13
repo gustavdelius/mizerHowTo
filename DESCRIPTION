@@ -35,7 +35,8 @@ Imports:
     viridis,
     shiny,
     shinyWidgets,
-    rstudioapi
+    rstudioapi,
+    ggpubr
 Suggests:
     tictoc,
     rmarkdown
@@ -44,6 +45,7 @@ Collate:
     'utility.R'
     'data.R'
     'mizerHowTo-package.R'
+    'calibration_functions.R'
 Remotes:  
     sizespectrum/mizerExperimental
 RoxygenNote: 7.1.1

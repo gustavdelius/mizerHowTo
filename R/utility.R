@@ -10,6 +10,16 @@
 #' @export
 tutorial <- function(tutorial_name = "HTM1", extension = "html") {
   switch (tutorial_name,
+          "HTM0" = {
+            if(extension == "Rmd")
+            {
+              rstudioapi::navigateToFile(
+                system.file("HTM0", "HTM0_whyUseMizer.Rmd",
+                            package = "mizerHowTo"))
+            } else if (extension == "html") browseURL(system.file("HTM0", "HTM0_whyUseMizer.html",
+                                                                  package = "mizerHowTo"))
+            #else if (extension == "website") browseURL("https://sizespectrum.org/mizerHowTo/articles/HTM1_parametrisation.html") # is the URL ready?
+          },
           "HTM1" = {
             if(extension == "Rmd")
             {

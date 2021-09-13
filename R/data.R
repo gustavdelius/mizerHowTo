@@ -15,6 +15,12 @@
 #' ....
 "FmatWeightedInterpolated"
 
+#' HTM calibrated simulation from HTM3 (ask Julia for more details)
+#' Used in HTM0
+#'
+#' ....
+"HTM0_sim"
+
 #' HTM1 final simulation saved (sim_guessed)
 #' Used at the beginning of HTM2
 #'
