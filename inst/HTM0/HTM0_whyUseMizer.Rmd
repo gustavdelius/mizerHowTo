@@ -26,8 +26,8 @@ params <- getParams(sim)
 effort <- getEffort(sim)
 
 # correct gear params
-params@gear_params$l25 = params@species_params$l25
-params@gear_params$l50 = params@species_params$l50 # assume the species params numbers are correct
+gear_params(params)$l25 <- species_params(params)$l25
+gear_params(params)$l50 <- species_params(params)$l50 # assume the species params numbers are correct
 
 ```
 
@@ -60,14 +60,14 @@ We can compare the current size spectra (averaged over 2015-2019) to the unfishe
 
 ```{r , code_folding=TRUE, eval = T, echo = F, warning=F}
 
-plot_relative_biomass = function(sim0, sim1, ratio = F) {
+plot_relative_biomass = function(sim0, sim1, ratio = FALSE) {
 
   # assume sim0 is steady state, sim1 is some kind of variation such as fishing
 
-  fish_sim = apply(sim1@n[as.character(2015:2019),,], c(2,3), mean) # mean of last five years
-  unfish_sim = sim0@n[dim(sim0@n)[1],,] # last snapshot of steady state sim
+  fish_sim = apply(N(sim1)[as.character(2015:2019), , ], c(2, 3), mean) # mean of last five years
+  unfish_sim = finalN(sim0) # last snapshot of steady state sim
   
-  if (ratio == T) {
+  if (ratio) {
     relative_n <- melt(fish_sim/unfish_sim) # Julia's original calculation
   } else {
     relative_n <- melt((fish_sim - unfish_sim) / (fish_sim + unfish_sim)) # Gustav's suggested calculation
