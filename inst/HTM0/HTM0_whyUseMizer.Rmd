@@ -7,27 +7,20 @@ Mizer is a tool that can be used to simulate a dynamic size spectrum in an marin
 
 Below we explore some examples of what can be done using a previously calibrated Mizer model. 
 
-First, we load the necessary packages.
-
 ```{r set-up, echo = F,message=F, warning=F}
-# remotes::install_github("sizespectrum/mizerHowTo") # if needed
-library(mizerHowTo)
-# remotes::install_github("sizespectrum/mizerExperimental") # if needed
-# library(mizerExperimental)
-# library(tidyverse)
-# library(ggpubr)
-# Romain and Gustav: can the be a short cut to the sim object that I calibrated? Ad call it HTM0_sim?
-#sim <- readRDS(system.file("HTM3/sim_opt_time.RDS", package = "mizerHowTo"))
+# by this stage user has already loaded mizerHowTo and opened the Rmd using tutorial("HTM0", extension = "Rmd)
+# leaving library for developper knitting
+library(mizerHowTo) 
 
-# also I need to rerun the calibration and post blog before we do the session!
+# TODO JB: need to rerun the calibration and post blog before we do the session!
 # upgrade params
 sim <- upgradeSim(HTM0_sim)
 params <- getParams(sim)
 effort <- getEffort(sim)
 
-# correct gear params
-gear_params(params)$l25 <- species_params(params)$l25
-gear_params(params)$l50 <- species_params(params)$l50 # assume the species params numbers are correct
+# correct gear params | Why are they wrong in the first place?
+gear_params(params)[,c("l25","l50")] <- species_params(params)[,c("l25","l50")]
+ # assume the species params numbers are correct
 
 ```
 
@@ -35,7 +28,7 @@ gear_params(params)$l50 <- species_params(params)$l50 # assume the species param
 
 In this example  we will read in a calibrated model for the North Sea, which consists of 12 interacting species and a background resource. All species are predators and prey since they feed according to size-based rules and they encounter each  other. Fishing is applied as a logistic curve by length, matched to the maturity length $l_{50}$ of each species.
 
-More information on how this model was calibrated with historical data can be found in our "mizerHowTo" package [tutorial link HTOM3] and in this [blogpost](https://blog.mizer.sizespectrum.org/posts/2021-08-20-a-5-step-recipe-for-tuning-the-model-steady-state/). 
+More information on how this model was calibrated with historical data can be found in our "mizerHowTo" package (`tutorial("HTM3")`) and in this [blogpost](https://blog.mizer.sizespectrum.org/posts/2021-08-20-a-5-step-recipe-for-tuning-the-model-steady-state/). 
 
 You can take a look at how the modelled species biomasses change through time by running the following:
 
@@ -154,7 +147,7 @@ We may now wish to explore the potential recovery of the larger species and size
 
 First let's take a look at what the model has used in the historical period (from ICES stock assessments).
 
-```{r}
+```{r, warning=FALSE}
 effort <- melt(getEffort(sim))  %>% filter(time >= 1980)
 
 plot_effort<-ggplot(effort) + 
@@ -169,8 +162,9 @@ The species' maximum fishing mortality rates (which we call for convenience effo
 
 The effort values in 2018 were
 
-```{r}
-(current_effort <- getEffort(sim)["2018", ])
+```{r, echo= FALSE}
+current_effort <- getEffort(sim)["2018", ]
+knitr::kable(t(current_effort), caption = "current effort",)
 ```
 
 
@@ -196,7 +190,7 @@ proj_effort[1:10, select_species] <-
 proj_effort[11:51, select_species] <- target
 
 # check it
-proj_effort[, select_species]
+flextable::regulartable(data.frame("time" = rownames(proj_effort), "effort" = proj_effort[,select_species]))
 
 # run the simulation forward, using the 2018 abundances as initial values
 params_status_quo <- setInitialValues(params, sim)
@@ -261,7 +255,7 @@ ggplot(Brel_ref, aes(x = time, y = value, fill = collapsed)) +
 
 ### Example 2: Set up an explore a time-varying fishing scenario
 
-We could examine how this fish community would have responded if there had been a completly different historical development of fishing fleets over time.
+We could examine how this fish community would have responded if there had been a completely different historical development of fishing fleets over time.
 
 Here we will examine how some commonly used community indicators of the ecosystem effects of fishing change in response to this scenario.
 
@@ -271,7 +265,7 @@ Here we will examine how some commonly used community indicators of the ecosyste
  
 ```{r}
 # look at the gear set up:
-gear_params(params)
+knitr::kable(gear_params(params), caption = "gear parameters")
 ```
  
  

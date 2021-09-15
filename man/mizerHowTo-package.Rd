@@ -11,8 +11,8 @@
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://sizespectrum/mizerHowTo}
-  \item Report bugs at \url{https://github.com/sizespectrum/mizerHowTo/issues}
+  \item \url{https://sizespectrum.org/mizerHowTo}
+  \item Report bugs at \url{https://github.com/sizespectrum.org/mizerHowTo/issues}
 }
 
 }

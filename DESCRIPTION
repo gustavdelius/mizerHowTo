@@ -36,7 +36,8 @@ Imports:
     shiny,
     shinyWidgets,
     rstudioapi,
-    ggpubr
+    ggpubr,
+    flextable
 Suggests:
     tictoc,
     rmarkdown

@@ -9,4 +9,5 @@
 #' @importFrom graphics legend
 #' @importFrom utils browseURL
 #' @importFrom ggpubr theme_pubr
+#' @importFrom flextable regulartable
 "_PACKAGE"
