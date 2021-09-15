@@ -53,38 +53,6 @@ We can compare the current size spectra (averaged over 2015-2019) to the unfishe
 
 ```{r , code_folding=TRUE, eval = T, echo = F, warning=F}
 
-plot_relative_biomass = function(sim0, sim1, ratio = FALSE) {
-
-  # assume sim0 is steady state, sim1 is some kind of variation such as fishing
-
-  fish_sim = apply(N(sim1)[as.character(2015:2019), , ], c(2, 3), mean) # mean of last five years
-  unfish_sim = finalN(sim0) # last snapshot of steady state sim
-  
-  if (ratio) {
-    relative_n <- melt(fish_sim/unfish_sim) # Julia's original calculation
-  } else {
-    relative_n <- melt((fish_sim - unfish_sim) / (fish_sim + unfish_sim)) # Gustav's suggested calculation
-  }
-  
-  p <- ggplot(relative_n) + 
-    geom_line(aes(x = w, y = value, colour = sp), size = 1) +
-    scale_x_continuous(trans = "log10") +
-    ggpubr::theme_pubr() +
-    labs(x = "Weight [g]")  
-  
-  if (ratio == T) {
-    p = p + scale_y_continuous(trans = "log10") + 
-      geom_hline(yintercept = 1, linetype = 1, colour="dark grey", size=0.75) + 
-      labs(y="Relative abundance")  
-  } else {
-    p = p + geom_hline(yintercept = 0, linetype = 1, colour="dark grey", size=0.75) + 
-      labs(y="Relative difference")  
-  }
-  
-  print(p)
-  
-}
-
 plot_relative_biomass(sim0, sim, ratio = T)
 plot_relative_biomass(sim0, sim)
 
@@ -190,7 +158,9 @@ proj_effort[1:10, select_species] <-
 proj_effort[11:51, select_species] <- target
 
 # check it
-flextable::regulartable(data.frame("time" = rownames(proj_effort), "effort" = proj_effort[,select_species]))
+proj_effortDf <- data.frame("time" = rownames(proj_effort), "effort" = proj_effort[,select_species])
+proj_effortDf_short <- proj_effortDf[c(1:13,49:51),] # looks nicer but keeping long version
+flextable::regulartable(proj_effortDf_short)
 
 # run the simulation forward, using the 2018 abundances as initial values
 params_status_quo <- setInitialValues(params, sim)
@@ -207,6 +177,7 @@ Brel_scen <- melt(sweep(getBiomass(sim_scen), 2, B_current, "/"))
 ggplot(Brel_scen) + 
   geom_line(aes(x=time,y=value,color=sp), size = 1) + 
   geom_hline(yintercept = 1, linetype=1, colour="grey", size=0.75) +
+  scale_y_continuous(name = "Relative biomass") +
   ggpubr::theme_pubr()
 
 ```
@@ -263,7 +234,7 @@ Here we will examine how some commonly used community indicators of the ecosyste
  
  Let's take a look at the fishing parameters. Note that the gears in the above model were already setup to be species-specific.
  
-```{r}
+```{r, echo = FALSE}
 # look at the gear set up:
 knitr::kable(gear_params(params), caption = "gear parameters")
 ```
@@ -277,12 +248,23 @@ gear_params(params)$gear <- c("super_trawler")
 ```
 
 
-Note that catchability is set to 1. This is because the fishing "effort" was here assumed to be the fishing mortality rate of fully selected sizes (see here *link to setFishing on mizer website*).
+Note that catchability is set to 1. This is because the fishing "effort" was here assumed to be the fishing mortality rate of fully selected sizes (see here [setFishing](https://sizespectrum.org/mizer/reference/setFishing.html?q=set%20fishing)).
 
 The previous effort won't work with these new gears, as it is gear x time. We only have a single gear now, so this is easier to set up.
 
 ```{r}
 
+params <- setFishing(params, initial_effort = 1.5)
+
+```
+
+
+```{r}
+sim_trawler <- projectToSteady(params, effort = 1, return_sim = TRUE, t_max = 200)
+
+plotlySpectra(sim_trawler)
+
+getProportionOfLargeFish(sim = sim_trawler)
 ```
 
 
