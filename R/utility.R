@@ -1371,3 +1371,40 @@ plotFMort <- function(object, species = NULL,
   if (return_data) return(plot_dat) else return(p)
 
 }
+
+
+#' Plot ....
+#'
+#' @export
+
+plot_relative_biomass = function(sim0, sim1, ratio = FALSE) {
+
+  # assume sim0 is steady state, sim1 is some kind of variation such as fishing
+
+  fish_sim = apply(N(sim1)[as.character(2015:2019), , ], c(2, 3), mean) # mean of last five years
+  unfish_sim = finalN(sim0) # last snapshot of steady state sim
+
+  if (ratio) {
+    relative_n <- melt(fish_sim/unfish_sim) # Julia's original calculation
+  } else {
+    relative_n <- melt((fish_sim - unfish_sim) / (fish_sim + unfish_sim)) # Gustav's suggested calculation
+  }
+
+  p <- ggplot(relative_n) +
+    geom_line(aes(x = w, y = value, colour = sp), size = 1) +
+    scale_x_continuous(trans = "log10") +
+    ggpubr::theme_pubr() +
+    labs(x = "Weight [g]")
+
+  if (ratio == T) {
+    p = p + scale_y_continuous(trans = "log10") +
+      geom_hline(yintercept = 1, linetype = 1, colour="dark grey", size=0.75) +
+      labs(y="Relative abundance")
+  } else {
+    p = p + geom_hline(yintercept = 0, linetype = 1, colour="dark grey", size=0.75) +
+      labs(y="Relative difference")
+  }
+
+  print(p)
+
+}
