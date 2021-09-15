@@ -40,6 +40,16 @@ tutorial <- function(tutorial_name = "HTM1", extension = "html") {
                                                                   package = "mizerHowTo"))
             else if (extension == "website") browseURL("https://sizespectrum.org/mizerHowTo/articles/HTM2_timeAveraged_calibration.html")
           },
+          "HTM3" = {
+            if(extension == "Rmd")
+            {
+              rstudioapi::navigateToFile(
+                system.file("HTM3", "HTM3_timeSeries_calibration.Rmd",
+                            package = "mizerHowTo"))
+            } else if (extension == "html") browseURL(system.file("HTM3", "HTM3_timeSeries_calibration.Rmd",
+                                                                  package = "mizerHowTo"))
+            # else if (extension == "website") browseURL("https://sizespectrum.org/mizerHowTo/articles/HTM2_timeAveraged_calibration.html") # is URL ready?
+          },
           {print("Something went wrong")}
   )
 }
