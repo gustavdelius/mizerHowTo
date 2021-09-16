@@ -947,8 +947,6 @@ getDietComp<- function(sim)
   # Index of predator size classes
   idx_sp<- object@w_full %in% object@w
 
-
-
   #  pred_kernel * interaction matrix
   for(iW in 1:no_w){
     for(iSpecies in 1:no_sp){
@@ -1389,12 +1387,13 @@ plot_relative_biomass = function(sim0, sim1, ratio = FALSE) {
   } else {
     relative_n <- melt((fish_sim - unfish_sim) / (fish_sim + unfish_sim)) # Gustav's suggested calculation
   }
-
+  colnames(relative_n)[1] <- "Species"
+  legend_levels <- intersect(names(sim0@params@linecolour), relative_n$Species)
   p <- ggplot(relative_n) +
-    geom_line(aes(x = w, y = value, colour = sp), size = 1) +
-    scale_x_continuous(trans = "log10") +
-    ggpubr::theme_pubr() +
-    labs(x = "Weight [g]")
+    geom_line(aes(x = w, y = value, colour = Species), size = 1) +
+    scale_x_continuous(trans = "log10", name = "Weight [g]") +
+    scale_color_manual(values = sim0@params@linecolour[legend_levels]) +
+    theme(legend.key = element_rect(fill = "white"))
 
   if (ratio == T) {
     p = p + scale_y_continuous(trans = "log10") +

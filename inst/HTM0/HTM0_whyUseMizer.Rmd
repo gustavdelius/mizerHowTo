@@ -9,12 +9,14 @@ Below we explore some examples of what can be done using a previously calibrated
 
 ```{r set-up, echo = F,message=F, warning=F}
 # by this stage user has already loaded mizerHowTo and opened the Rmd using tutorial("HTM0", extension = "Rmd)
-# leaving library for developper knitting
+# leaving library for developer knitting
 library(mizerHowTo) 
 
 # TODO JB: need to rerun the calibration and post blog before we do the session!
 # upgrade params
 sim <- upgradeSim(HTM0_sim)
+sim@params@linecolour[1:dim(sim@params@species_params)[1]] <- viridis::viridis(dim(sim@params@species_params)[1]) # color gradient of asymptotic sizes
+
 params <- getParams(sim)
 effort <- getEffort(sim)
 
@@ -33,9 +35,8 @@ More information on how this model was calibrated with historical data can be fo
 You can take a look at how the modelled species biomasses change through time by running the following:
 
 ```{r}
-# species' biomass through time
 plotlyBiomass(sim, start_time = 1950, end_time = 2018)
-# look at size spectra in final 5 years
+# size spectra averaged for the final 5 years
 plotlySpectra(sim,time_range = c(2015:2018),power=2)
 ```
 
@@ -43,15 +44,19 @@ plotlySpectra(sim,time_range = c(2015:2018),power=2)
 
 To be able to examine any changes in the community relative to an unfished state we can re-set effort = 0 and calculate the steady state. 
 
-```{r, eval = T, echo = F, warning=F}
+```{r, eval = T, echo = F, warning=F, message=F}
 sim0 <- projectToSteady(params, effort = 0, return_sim = TRUE, t_max = 200)
-plotlyBiomass(sim0)
 #  or could set the initial N to this state, would be better? better to set  this up in advance so we dont have to do it here?
+```
+
+
+```{r, warning=F}
+plotlyBiomass(sim0)
 ```
 
 We can compare the current size spectra (averaged over 2015-2019) to the unfished size spectra to assess whether there is any evidence of a size-structured trophic cascade due to fishing.
 
-```{r , code_folding=TRUE, eval = T, echo = F, warning=F}
+```{r , code_folding=TRUE, eval = T, echo = T, warning=F}
 
 plot_relative_biomass(sim0, sim, ratio = T)
 plot_relative_biomass(sim0, sim)
@@ -115,15 +120,19 @@ We may now wish to explore the potential recovery of the larger species and size
 
 First let's take a look at what the model has used in the historical period (from ICES stock assessments).
 
-```{r, warning=FALSE}
-effort <- melt(getEffort(sim))  %>% filter(time >= 1980)
+```{r, warning=FALSE, echo = FALSE}
+plot_dat <- melt(getEffort(sim))  %>% filter(time >= 1980)
+colnames(plot_dat)[2] <- "Species"
+legend_levels <- intersect(names(sim@params@linecolour), plot_dat$Species)
 
-plot_effort<-ggplot(effort) + 
-geom_line(aes(x = time, y = value, colour = gear), size = 1) + 
-ggpubr::theme_pubr() +
-labs(y="Effort",x="") 
+ggplot(plot_dat) + 
+geom_line(aes(x = time, y = value, colour = Species), size = 1) + 
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "Effort") +
+  scale_color_manual(values = sim@params@linecolour[legend_levels]) +
+  theme(legend.key = element_rect(fill = "white"))
 
-plot_effort
+
 ```
 
 The species' maximum fishing mortality rates (which we call for convenience effort) for Cod and Saithe have declined but are not as low as what would be in line with single-species "Fmsy" (a reference level of fishing  deemed sustainable from  single-species stock assessements) and the fishing mortality rate for Sprat and Dab is very high. 
@@ -133,7 +142,7 @@ The effort values in 2018 were
 
 ```{r, echo= FALSE}
 current_effort <- getEffort(sim)["2018", ]
-knitr::kable(t(current_effort), caption = "current effort",)
+knitr::kable(t(current_effort), caption = "Current effort",)
 
 ```
 
@@ -144,7 +153,7 @@ We will apply a linear reduction in effort for a selected species to a target va
 To do this we need to work with the effort array (time x gear) to enable changes in effort through time, for this scenario. Here we have a 'gear' for each species, since effort in this case were annual single-species fishing mortality estimates.
 
 
-```{r}
+```{r, echo = FALSE}
 
 sim_status_quo<-project(params,initial_n = sim@n["2018",,], initial_n_pp = sim@n_pp["2018",],effort=current_effort,t_max = 50)
 
@@ -167,9 +176,9 @@ proj_effort[1:10, select_species] <-
 proj_effort[11:51, select_species] <- target
 
 # check it
-proj_effortDf <- data.frame("time" = rownames(proj_effort), "effort" = proj_effort[,select_species])
+proj_effortDf <- data.frame("Time" = rownames(proj_effort), "Effort" = proj_effort[,select_species])
 proj_effortDf_short <- proj_effortDf[c(1:13,49:51),] # looks nicer but keeping long version
-flextable::regulartable(proj_effortDf_short)
+flextable::regulartable(proj_effortDf_short) %>% flextable::set_caption("Projected effort on Sprat")
 
 # run the simulation forward, using the 2018 abundances as initial values
 
@@ -187,12 +196,16 @@ plotlyBiomass(sim_scen)
 B_current <- getBiomass(sim_scen)[1, ]
 
 Brel_scen <- melt(sweep(getBiomass(sim_scen), 2, B_current, "/"))
+colnames(Brel_scen)[2] <- "Species"
+legend_levels <- intersect(names(sim_scen@params@linecolour), Brel_scen$Species)
 
 ggplot(Brel_scen) + 
-  geom_line(aes(x=time,y=value,color=sp), size = 1) + 
-  geom_hline(yintercept = 1, linetype=1, colour="grey", size=0.75) +
+  geom_line(aes(x = time,y = value,color = Species), size = 1) + 
+  geom_hline(yintercept = 1, linetype = 1, colour = "grey", size = 0.75) +
   scale_y_continuous(name = "Relative biomass") +
-  ggpubr::theme_pubr()
+  scale_color_manual(values = sim@params@linecolour[legend_levels]) +
+  theme(legend.key = element_rect(fill = "white"))
+
 
 ```
 
@@ -200,9 +213,9 @@ We can see that when we reduce fishing on Sprat it increases the biomass of this
 
 Are any species collapsed still?
 
-```{r}
+```{r, echo = FALSE}
 
-Brel_ref <- melt(sweep(getBiomass(sim_scen), 2, B0, "/"))
+# Brel_ref <- melt(sweep(getBiomass(sim_scen), 2, B0, "/"))
 
 Brel_ref <- Brel_scen  %>% mutate(collapsed = value < 0.1)
 
@@ -211,7 +224,7 @@ ggplot(Brel_ref, aes(x = time, y = value, fill = collapsed)) +
     geom_hline(yintercept = 0.1, colour="red", size = 0.75) +
     geom_hline(yintercept = 0.5, colour="dark grey", size = 0.75) +
     scale_fill_manual(values = alpha(c("blue", "red"), .3)) +
-    facet_wrap(vars(sp)) +
+    facet_wrap(vars(Species)) +
     theme_void()
 ```
 
@@ -274,9 +287,13 @@ params <- setFishing(params, initial_effort = 1.5)
 
 
 ```{r}
-sim_trawler <- projectToSteady(params, effort = 1, return_sim = TRUE, t_max = 200)
+sim_trawler <- projectToSteady(params, effort = 1.5, return_sim = TRUE, t_max = 200)
 
 plotlySpectra(sim_trawler)
+
+plotlyBiomass(sim_trawler)
+
+plotFMort(sim_trawler)
 
 getProportionOfLargeFish(sim = sim_trawler)
 ```
