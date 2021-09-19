@@ -229,9 +229,9 @@ plot_Brel_all
 ```
 
 
-## Exercise: Set up your own fishing scenario
+## Example 2: Set up your own fishing scenario
 
-We could examine how this fish community would have responded if there had been a completely different historical development of fishing fleets over time.
+Rather than an entire time-series, we can also examine differences between two time-averaged states.
 
  We can alter the  fishing parameters using a function called *gear_params()* and by changing the *effort* input. 
  
@@ -277,8 +277,8 @@ plot_relative_biomass(sim_light,sim_heavy)
 
 Large individuals are the most affected by the high fishing effort. This create a trophic cascade where smaller individuals, even if they are affected by the same fishing effort, will increase in abundance due to the release in predation from larger individuals.
 
-Now try to edit the above code to create your own fishing scenario.
-
+#### Exercise: Now try to edit the above code to create your own fishing scenario. 
+ 
 
 ### Example 2: add a species to the North Sea model
 
@@ -342,11 +342,4 @@ knitr::kable(new_params@species_params %>% select(species, biomass_observed, R_m
 ```
 
 
-<!-- ### Example 4: Adding a variable environment -->
 
-<!-- ```{r} -->
-
-<!-- ``` -->
-
-
-<!-- Now we can look at probability of collapse. -->
