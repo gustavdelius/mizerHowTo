@@ -1378,9 +1378,9 @@ plotFMort <- function(object, species = NULL,
 plot_relative_biomass = function(sim0, sim1, ratio = FALSE) {
 
   # assume sim0 is steady state, sim1 is some kind of variation such as fishing
-
-  fish_sim = apply(N(sim1)[as.character(2015:2019), , ], c(2, 3), mean) # mean of last five years
-  unfish_sim = finalN(sim0) # last snapshot of steady state sim
+  # mean of last five years
+  fish_sim <- apply(N(sim1)[(dim(N(sim1))[1]-5):(dim(N(sim1))[1]),,],2:3,mean)
+  unfish_sim <- apply(N(sim0)[(dim(N(sim0))[1]-5):(dim(N(sim0))[1]),,],2:3,mean)
 
   if (ratio) {
     relative_n <- melt(fish_sim/unfish_sim) # Julia's original calculation
