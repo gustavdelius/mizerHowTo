@@ -231,7 +231,7 @@ plot_Brel_all
 
 ## Example 2: Set up your own fishing scenario
 
-Rather than an entire time-series, we can also examine differences between two time-averaged states.
+Rather than an entire time-series, we can also simply examine differences between two time-averaged states under different fishing regimes.
 
  We can alter the  fishing parameters using a function called *gear_params()* and by changing the *effort* input. 
  
@@ -280,7 +280,7 @@ Large individuals are the most affected by the high fishing effort. This create 
 #### Exercise: Now try to edit the above code to create your own fishing scenario. 
  
 
-### Example 2: add a species to the North Sea model
+### Example 3: add a species to the North Sea model
 
 Let's start with the North Sea model as in Example 1.
 
