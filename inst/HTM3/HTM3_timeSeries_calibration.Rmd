@@ -259,7 +259,7 @@ plotFittedTime(sim_opt,obsy,allSpecies = F,plotSpecies = "Cod")
 Do these look any better than before? If we construct the yield curves do the Fmsy values seem to be reasonable? 
 
 ```{r}
-plotYield(sim_opt,obsy,allSpecies = F)
+# plotYield(sim_opt,obsy,allSpecies = F)
 ```
 
 This is because the estimates of erepro are taking into account how each species responds to fishing through time. However, there are still mismatches between observed and modelled catches. 
