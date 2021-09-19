@@ -62,7 +62,7 @@ getErrorTime <- function(vary,params,dat,env=state,tol = 0.1) {
 ########## Plot the outputs of the time series calibration
 ##########------------------------------------------------------
 
-
+#' @export
 plotFittedTime<-function(sim=simt,obsy=obsy,allSpecies=T,plotSpecies=NULL,startyr=1947,endyr=2019){
 
   biomass <- sweep(sim@n, 3, sim@params@w * sim@params@dw, "*")
