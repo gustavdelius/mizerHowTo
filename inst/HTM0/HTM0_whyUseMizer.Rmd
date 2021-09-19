@@ -89,31 +89,11 @@ We can do the same with Biomass to see when, if any, of the species collapse. Fo
 
 ```{r,code_folding=TRUE, eval = T, echo = F, warning=F}
 
-# select the species  (or should we set this up with all species, like plotlyBiomass, should we make these plots in built functions?)
+# collect the biomasses from unfish and calcualte the relative change
 
 B0 <- getBiomass(sim0)[idxFinalT(sim0), ]
 Brel <- melt(sweep(getBiomass(sim), 2, B0, "/"))
 
-# select_species = "Sprat"
-
-# Brel_select <- Brel %>%
-#   filter(sp == select_species & time >= 1950) 
-
-
-# plot_Brel<-ggplot(Brel_select)+ geom_line(aes(x=time,y=value), size = 1) + 
-# ggpubr::theme_pubr() + 
-# geom_hline(yintercept = 0.1, linetype=1, colour="red", size=0.75) +
-#   geom_hline(yintercept = 0.5, linetype=1, colour="steel blue", size=0.75) +
-# labs(x="",y="Relative Biomass") +
-# scale_y_continuous(limits = c(0,max(Brel_select$value)))
-# 
-# plot_Brel<- plot_Brel  +
-#     annotate("text", x = 1951, y = 0.1+0.05, label = "Blim", color = "red") +
-#     annotate("text", x = 1951, y = 0.5+0.05, label = "Bmsy", color = "steel blue") +
-#     annotate("text", x = 2015, y = max(Brel_select$value), 
-#              label = select_species, color = "black") 
-# 
-# plot_Brel
 
 plot_Brel_all<-ggplot(filter(Brel, time >= 1950))+ 
   geom_line(aes(x=time,y=value), size = 1) + 
@@ -127,7 +107,7 @@ plot_Brel_all<-ggplot(filter(Brel, time >= 1950))+
   annotate("text", x = 1957, y = 0.5+0.15, label = "Bmsy", color = "steel blue")
 
 plot_Brel_all
-# which years < 0.1 B_unfished
+
 
 Brel_select <- Brel %>%
     filter(sp == "Sprat" & time >= 1950) %>%
@@ -170,14 +150,10 @@ To do this we need to work with the effort array (time x gear) to enable changes
 
 sim_status_quo<-project(params,initial_n = sim@n["2018",,], initial_n_pp = sim@n_pp["2018",],effort=current_effort,t_max = 50)
 
-# proj_effort<-sim_status_quo@effort
 
 proj_effort <- matrix(current_effort, nrow = 51, ncol = 12, byrow = TRUE)
 dimnames(proj_effort) <- list(time = 2019:2069,
                               gear = unique(gear_params(params)$gear))
-
-
-# sp_idx <- which(species_params(params)$species == "Sprat")
 
 target<-0.2
 select_species="Sprat"
@@ -195,16 +171,11 @@ flextable::regulartable(proj_effortDf_short) %>% flextable::set_caption("Project
 
 # run the simulation forward, using the 2018 abundances as initial values
 
-
-# sim_scen<-project(params,initial_n = sim@n["2018",,], initial_n_pp = sim@n_pp["2018",],effort=proj_effort,t_max = 50)
-
 params_status_quo <- setInitialValues(params, sim)
 sim_scen <- project(params_status_quo, effort = proj_effort, t_max = 50)
 
 
 # plot change in biomass relative to 2018 values
-
-# plotlyBiomass(sim_scen)
 
 B_current <- getBiomass(sim_scen)[1, ]
 
@@ -227,8 +198,6 @@ We can see that when we reduce fishing on Sprat it increases the biomass of this
 Are any species collapsed still?
 
 ```{r, echo = FALSE}
-
-# Brel_ref <- melt(sweep(getBiomass(sim_scen), 2, B0, "/"))
 
 Brel_ref <- Brel_scen  %>% mutate(collapsed = value < 0.1)
 
@@ -257,48 +226,12 @@ plot_Brel_all<-ggplot(Brel_ref)+
 
 plot_Brel_all
 
-# plot_Brel<-ggplot(Brel_select)+ geom_line(aes(x=time,y=value), size = 1) + 
-# ggpubr::theme_pubr() + 
-# geom_hline(yintercept = 0.1, linetype=1, colour="red", size=0.75) +
-#   geom_hline(yintercept = 0.5, linetype=1, colour="steel blue", size=0.75) +
-# labs(x="",y="Relative Biomass") +
-# scale_y_continuous(limits = c(0,max(Brel_select$value)))
-# 
-# plot_Brel<- plot_Brel  +
-#     annotate("text", x = 1951, y = 0.1+0.05, label = "Blim", color = "red") +
-#     annotate("text", x = 1951, y = 0.5+0.05, label = "Bmsy", color = "steel blue") +
-#     annotate("text", x = 2015, y = max(Brel_select$value), 
-#              label = select_species, color = "black") 
 ```
 
 
-### Exploration options - break into smaller groups:
-
-1. Cut and paste the above code chunks and edit it to explore your own fishing scenarios.
-```{r}
-
-```
-
-2. Alter some of of the model parameters to see how this affects the scenario outcomes.
-```{r}
-
-```
-
-3. Using the unfished sim object examine the effects of adding a species to the model
-
-```{r}
-
-```
-
-
-
-## Further Exploration
-
-### Example 2: Set up a fishing scenario
+## Exercise: Set up your own fishing scenario
 
 We could examine how this fish community would have responded if there had been a completely different historical development of fishing fleets over time.
-
-Here we will examine how some commonly used community indicators of the ecosystem effects of fishing change in response to this scenario.
 
  We can alter the  fishing parameters using a function called *gear_params()* and by changing the *effort* input. 
  
@@ -318,7 +251,6 @@ We can group these species  together according to the gears they are caught by. 
 # allocate species to gear types
 gear_params(params)$gear <- c("super_trawler")
 ```
-
 
 Note that catchability is set to 1. This is because the fishing "effort" was here assumed to be the fishing mortality rate of fully selected sizes (see here [setFishing](https://sizespectrum.org/mizer/reference/setFishing.html?q=set%20fishing)).
 
@@ -345,8 +277,10 @@ plot_relative_biomass(sim_light,sim_heavy)
 
 Large individuals are the most affected by the high fishing effort. This create a trophic cascade where smaller individuals, even if they are affected by the same fishing effort, will increase in abundance due to the release in predation from larger individuals.
 
+Now try to edit the above code to create your own fishing scenario.
 
-### Example 3: add a species to the North Sea model
+
+### Example 2: add a species to the North Sea model
 
 Let's start with the North Sea model as in Example 1.
 
