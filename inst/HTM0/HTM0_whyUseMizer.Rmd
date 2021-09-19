@@ -13,7 +13,6 @@ Below we explore some examples of what can be done using a previously calibrated
 # leaving library for developer knitting
 library(mizerHowTo) 
 
-# TODO JB: need to rerun the calibration and post blog before we do the session!
 # upgrade params
 sim <- upgradeSim(HTM0_sim)
 sim@params@linecolour[1:dim(sim@params@species_params)[1]] <- viridis::viridis(dim(sim@params@species_params)[1]) # color gradient of asymptotic sizes
@@ -21,9 +20,13 @@ sim@params@linecolour[1:dim(sim@params@species_params)[1]] <- viridis::viridis(d
 params <- getParams(sim)
 effort <- getEffort(sim)
 
-# correct gear params | Why are they wrong in the first place?
+# correct gear params 
 gear_params(params)[,c("l25","l50")] <- species_params(params)[,c("l25","l50")]
  # assume the species params numbers are correct
+
+# remove comment, needed to add species
+comment(params@catchability) = NULL 
+
 
 ```
 
@@ -64,9 +67,8 @@ plotlySpectra(sim,time_range = c(2015:2018),power=2)
 
 To be able to examine any changes in the community relative to an unfished state we can re-set effort = 0 and calculate the steady state. 
 
-```{r, eval = T, echo = F, warning=F, message=F}
+```{r, eval = T, warning=F, message=F}
 sim0 <- projectToSteady(params, effort = 0, return_sim = TRUE, t_max = 200)
-#  or could set the initial N to this state, would be better? better to set  this up in advance so we dont have to do it here?
 ```
 
 
@@ -349,7 +351,6 @@ Large individuals are the most affected by the high fishing effort. This create 
 Let's start with the North Sea model as in Example 1.
 
 ```{r}
-comment(params@catchability) = NULL # remove comment, needed to add species
 params@species_params$biomass_observed = getBiomass(sim)[nrow(sim@n), ] # set biomass_observed
 
 plotCalibration(sim)
