@@ -130,14 +130,14 @@ Let's take a look at the current $F_{msy}$ per species.
 
 Note that `plotFmsy()` takes a long time to compute, especially at high effort resolution (`effortRes` argument which determines the number of simulation per species that are run). 
 
-```{r step 2 - Fmsy | data crunching, eval=F, echo = F}
+```{r step2-Fmsy_data_crunching, eval=F, echo = F}
 # Not evaluated because slow (especially at high effortRes)
 plot_dat <- plotFmsy(params_optim, returnData = T, effortRes = 50)
 # saveRDS(plot_dat, "Fmsy1.rds")
 ```
 
 
-```{r step 2 - Fmsy | plots, warning=F, echo = F}
+```{r step2-Fmsy_plots, warning=F, echo = F}
 plot_dat <- HTM2_Fmsy1
 ggplot(plot_dat) +
   geom_line(aes(x = effort , y = yield, color = species))+
