@@ -3,11 +3,11 @@ This package contains several tutorials aiming to learn how to handle mizer mode
 
 How to install:
 
-The `devtools` package is needed to install packages hosted on GitHub. 
+The `remotes` package is needed to install packages hosted on GitHub. 
 
-Use `install.packages("devtools")` if necessary
+Use `install.packages("remotes")` if necessary
 
-Then `devtools::install_github("sizespectrum/mizerHowTo")`
+Then `remotes::install_github("sizespectrum/mizerHowTo")`
 
 Finally, load the newly installed package with
 
@@ -19,15 +19,14 @@ Available tutorials are
   
 - HTM0: Examples on the use of Mizer
 
-- HTM1: How to parametrise a Mizer model
-
-- HTM2: How to calibrate a Mizer model using averaged data over time
+Other tutorials are in preparation but are currently incomplete and partially
+outdated.
 
 Examples: 
 
-`tutorial("HTM1","html")` will display the online version of the first tutorial.
+`tutorial("HTM0","html")` will display the online version of the first tutorial.
 
-`tutorial("HTM2","Rmd")` will display the code of the second tutorial.
+`tutorial("HTM0","Rmd")` will display the code of the first tutorial.
 
 Several shiny apps (R code with user interface) are embedded in the tutorials. One can start them from the Rmarkdown files (.Rmd) by running the appropriate chunk of code.
 All shiny apps functions follows this expression `shiny_XXX()`.

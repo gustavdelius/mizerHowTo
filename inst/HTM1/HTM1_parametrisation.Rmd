@@ -9,12 +9,13 @@ place: Hobart, Australia
 always_allow_html: yes
 ---
 
+# This tutorial is a work in progress and is currently outdated.
 
 # Beginner level tutorial - how to parameterise a Mizer model
 
 In this tutorial you will learn 
 
-- What type of data is needed to parametrise a Mizer model
+- What type of data is needed to parameterise a Mizer model
 
 - How to convert raw data into a `mizerParams` object
 

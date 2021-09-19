@@ -8,7 +8,10 @@ output:
   pdf_document: default
 ---
 
+# This tutorial is a work in progress and is currently outdated.
+
 # Introduction 
+
 
 There are many emerging size spectrum modelling (including mizer) applications that aim to examine changes in time series through time. Depending on your question and the goals you have in mind for your model, it may even be worth fitting models to time series data. We may wish to discuss this later. A first step in exploration of ecosystem models with time series however, often starts by simply varying input or "forcing" parameters through time. 
 

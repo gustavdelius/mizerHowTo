@@ -18,6 +18,7 @@ params_guessed <- sim_guessed@params
 
 ```
 
+# This tutorial is a work in progress and is currently outdated.
 
 # Intermediate level tutorial - how to calibrate a Mizer model
 
