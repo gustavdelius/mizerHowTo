@@ -14,19 +14,10 @@ Below we explore some examples of what can be done using a previously calibrated
 library(mizerHowTo) 
 
 # upgrade params
-sim <- upgradeSim(HTM0_sim)
-sim@params@linecolour[1:dim(sim@params@species_params)[1]] <- viridis::viridis(dim(sim@params@species_params)[1]) # color gradient of asymptotic sizes
+sim <- upgradeSim(HTM0_sim2)
 
 params <- getParams(sim)
 effort <- getEffort(sim)
-
-# correct gear params 
-gear_params(params)[,c("l25","l50")] <- species_params(params)[,c("l25","l50")]
- # assume the species params numbers are correct
-
-# remove comment, needed to add species
-comment(params@catchability) = NULL 
-
 
 ```
 
@@ -201,18 +192,6 @@ Are any species collapsed still?
 
 Brel_ref <- Brel_scen  %>% mutate(collapsed = value < 0.1)
 
-# ggplot(Brel_ref, aes(x = time, y = value, fill = collapsed)) +
-#     geom_col(position = "identity") +
-#     geom_hline(yintercept = 0.1, colour="red", size = 0.75) +
-#     geom_hline(yintercept = 0.5, colour="dark grey", size = 0.75) +
-#     scale_fill_manual(values = alpha(c("blue", "red"), .3)) +
-#   scale_x_continuous(breaks = c(2020,2050))+
-#   scale_y_continuous(name = "Relative biomass") +
-#     facet_wrap(vars(Species)) +
-#   ggpubr::theme_pubr()
-#     # theme_void()
-
-
 plot_Brel_all<-ggplot(Brel_ref)+ 
   geom_line(aes(x=time,y=value), size = 1) + 
   ggpubr::theme_pubr() + 
@@ -238,9 +217,6 @@ Rather than an entire time-series, we can also simply examine differences betwee
  Let's take a look at the fishing parameters. Note that the gears in the above model were already setup to be species-specific.
  
 ```{r, echo = FALSE}
-# look at the gear set up:
-# rownames issue
-
 knitr::kable(gear_params(params), caption = "gear parameters",row.names = F)
 ```
  
@@ -257,9 +233,7 @@ Note that catchability is set to 1. This is because the fishing "effort" was her
 The previous effort won't work with these new gears, as it is gear x time. We only have a single gear now, so this is easier to set up.
 
 ```{r}
-
 params <- setFishing(params, initial_effort = 1)
-
 ```
 
 

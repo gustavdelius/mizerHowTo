@@ -21,6 +21,12 @@
 #' ....
 "HTM0_sim"
 
+#' HTM calibrated simulation from HTM3 (ask Julia for more details)
+#' Used in HTM0, updated for latest mizer version
+#'
+#' ....
+"HTM0_sim2"
+
 #' HTM1 final simulation saved (sim_guessed)
 #' Used at the beginning of HTM2
 #'
