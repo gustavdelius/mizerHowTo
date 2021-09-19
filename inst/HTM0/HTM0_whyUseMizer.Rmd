@@ -277,10 +277,24 @@ plot_relative_biomass(sim_light,sim_heavy)
 
 As we saw before large individuals are the most affected by the high fishing effort. This create a trophic cascade where smaller individuals, even if they are affected by the same fishing effort, will increase in abundance due to the release in predation from larger individuals.
 
-Exercise: Now try to edit the above code to create your own fishing scenario. 
+We can also extract the species biomasses:
+```{r}
+biomass<-rbind(getBiomass(sim_light)[100,],getBiomass(sim_heavy)[100,])
+row.names(biomass)<-c("light","heavy")
+```
+
+
+As well as yields:
+```{r, warning=F}
+yield<-rbind(getYield(sim_light)[100,],getYield(sim_heavy)[100,])
+row.names(yield)<-c("light","heavy") 
+```
+
+
+**Exercise: Now try to edit the above code to create your own fishing scenario.** 
  
 
-### Example 3: add a species to the North Sea model
+### Example 3: Add a species to the North Sea model
 
 Let's start with the North Sea model as in Example 1.
 
