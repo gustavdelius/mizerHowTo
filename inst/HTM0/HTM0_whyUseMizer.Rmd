@@ -201,16 +201,16 @@ Are any species collapsed still?
 
 Brel_ref <- Brel_scen  %>% mutate(collapsed = value < 0.1)
 
-ggplot(Brel_ref, aes(x = time, y = value, fill = collapsed)) +
-    geom_col(position = "identity") +
-    geom_hline(yintercept = 0.1, colour="red", size = 0.75) +
-    geom_hline(yintercept = 0.5, colour="dark grey", size = 0.75) +
-    scale_fill_manual(values = alpha(c("blue", "red"), .3)) +
-  scale_x_continuous(breaks = c(2020,2050))+
-  scale_y_continuous(name = "Relative biomass") +
-    facet_wrap(vars(Species)) +
-  ggpubr::theme_pubr()
-    # theme_void()
+# ggplot(Brel_ref, aes(x = time, y = value, fill = collapsed)) +
+#     geom_col(position = "identity") +
+#     geom_hline(yintercept = 0.1, colour="red", size = 0.75) +
+#     geom_hline(yintercept = 0.5, colour="dark grey", size = 0.75) +
+#     scale_fill_manual(values = alpha(c("blue", "red"), .3)) +
+#   scale_x_continuous(breaks = c(2020,2050))+
+#   scale_y_continuous(name = "Relative biomass") +
+#     facet_wrap(vars(Species)) +
+#   ggpubr::theme_pubr()
+#     # theme_void()
 
 
 plot_Brel_all<-ggplot(Brel_ref)+ 
@@ -275,9 +275,9 @@ sim_heavy <- project(params, effort = 1.5, t_max = 100)
 plot_relative_biomass(sim_light,sim_heavy)
 ```
 
-Large individuals are the most affected by the high fishing effort. This create a trophic cascade where smaller individuals, even if they are affected by the same fishing effort, will increase in abundance due to the release in predation from larger individuals.
+As we saw before large individuals are the most affected by the high fishing effort. This create a trophic cascade where smaller individuals, even if they are affected by the same fishing effort, will increase in abundance due to the release in predation from larger individuals.
 
-#### Exercise: Now try to edit the above code to create your own fishing scenario. 
+Exercise: Now try to edit the above code to create your own fishing scenario. 
  
 
 ### Example 3: add a species to the North Sea model
