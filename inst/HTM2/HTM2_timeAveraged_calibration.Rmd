@@ -3,8 +3,9 @@ title: "How to Mizer - how to calibrate/refine a mizer model to time-averaged ca
 author: "Julia L. Blanchard, Ken H. Andersen, Romain Forestier"
 date: "`r Sys.Date()`"
 place: Hobart, Australia
-output:
-  html_document: default
+output: rmdformats::readthedown
+css: custom.css
+  # html_document: default
   # pdf_document: default
 always_allow_html: true
 #runtime: shiny
@@ -17,8 +18,6 @@ sim_guessed <- HTM1_sim
 params_guessed <- sim_guessed@params
 
 ```
-
-# This tutorial is a work in progress and is currently outdated.
 
 # Intermediate level tutorial - how to calibrate a Mizer model
 

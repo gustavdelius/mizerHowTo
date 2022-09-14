@@ -2,6 +2,7 @@
 title: "Why use Mizer?"
 author: "Julia L. Blanchard, Samik Datta, Romain Forestier"
 output: rmdformats::readthedown
+css: custom.css
 ---
 
 Mizer is a tool that can be used to simulate a dynamic size spectrum in an marine ecosystem, subject to changes through time, such as fishing pressure. Multiple interacting species and fishing gears can be defined allowing for a range of fisheries management strategy scenarios, and their ecosystem impacts, to be tested.

@@ -3,12 +3,11 @@ title: "How to Mizer - how to calibrate/refine a mizer model to time-series catc
 author: Julia L. Blanchard
 date:  "`r Sys.Date()`"
 place: Hobart, Australia
-output:
-  html_document: default
-  pdf_document: default
+output: rmdformats::readthedown
+css: custom.css
+  # html_document: default
+  # pdf_document: default
 ---
-
-# This tutorial is a work in progress and is currently outdated.
 
 # Introduction 
 

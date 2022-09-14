@@ -1,0 +1,63 @@
+#main .nav-pills > li.active > a,
+#main .nav-pills > li.active > a:hover,
+#main .nav-pills > li.active > a:focus {
+    background-color: #DA0CF2; /* ? */
+}
+
+#main .nav-pills > li > a:hover { /* ? */
+    background-color: #35CBE4;
+}
+
+h1, h2, h3, h4, h5, h6, legend { /* in text titles and subtitles */
+    color: #317EAC;
+}
+
+#nav-top span.glyphicon { /* ? */
+    color: #FFC300;
+}
+
+#table-of-contents header { /* ? */
+    color: #FFC300;
+}
+
+#table-of-contents h2 {
+    background-color: #35CBE4; /* ? */
+}
+
+#main a {
+    background-image: linear-gradient(180deg,#DA0CF2,#DA0CF2); /* ? */
+    color: #DA0CF2;
+}
+
+a:hover {
+    color: #DA0CF2; /* ? */
+}
+
+a:visited {
+    color: #DA0CF2; /* ? */
+}
+
+
+/* other answers*/
+
+#sidebar { /* sidebar background */
+  background: #FFFFFF ;
+}
+
+#postamble { /* authors bottom */
+  background:#30BEEE;
+  border-top:solid 10px #FFC300;
+}
+
+.title { /* title */
+  text-align: center;
+  color: #317EAC;
+}
+
+.subtitle { /* ? */
+  color: #317EAC;
+}
+
+#sidebar h2 { /* sidebar title */
+    background-color: #30BEEE;
+}

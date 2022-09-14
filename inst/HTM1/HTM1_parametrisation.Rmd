@@ -2,14 +2,13 @@
 title: "How to Mizer - how to parametrise a Mizer model"
 author: "Julia L. Blanchard, Ken H. Andersen, Romain Forestier"
 date: "`r Sys.Date()`"
-output:
+output: rmdformats::readthedown
+css: custom.css
   #pdf_document: default
-  html_document: default
+  #html_document: default
 place: Hobart, Australia
 always_allow_html: yes
 ---
-
-# This tutorial is a work in progress and is currently outdated.
 
 # Beginner level tutorial - how to parameterise a Mizer model
 
