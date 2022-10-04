@@ -47,9 +47,9 @@ Collate:
     'data.R'
     'mizerHowTo-package.R'
     'calibration_functions.R'
-Remotes:  
+Remotes: 
     sizespectrum/mizerExperimental
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 Roxygen: list(markdown = TRUE)
 URL: https://sizespectrum.org/mizerHowTo
 BugReports: https://github.com/sizespectrum.org/mizerHowTo/issues

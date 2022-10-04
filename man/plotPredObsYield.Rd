@@ -7,12 +7,9 @@
 plotPredObsYield(sim, dat, returnData = FALSE)
 }
 \arguments{
-\item{sim}{An object if class MizerSim}
+\item{sim}{An object of class MizerSim}
 
 \item{dat}{A dataframe containing the observed yield values}
-
-\item{returnData}{A boolean value that determines whether to return the plot
-or the data itself. Default is FALSE}
 }
 \description{
 A function that plots the predicted yield versus observed yield.

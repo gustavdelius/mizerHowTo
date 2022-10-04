@@ -14,11 +14,10 @@ plotCalibration(
 )
 }
 \arguments{
+\item{sim}{An object of class MizerSim}
+
 \item{stage}{Numeric values which determines the function's output. Range from 1 to 3.
 Default is 1.}
-
-\item{wlim}{A numeric vector of length two providing lower and upper limits for the x axis.
-Use NA to refer to the existing minimum or maximum. Default is c(0.001,NA).}
 
 \item{power}{The abundance is plotted as the number density times the weight raised to power.
 The default power = 1 gives the biomass density, whereas power = 2 gives the biomass density

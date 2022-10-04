@@ -6,28 +6,27 @@
 a mizerSim object.}
 \usage{
 plotSummary(
-  x,
+  sim,
   power = 1,
-  wlim = c(0.001, NA),
   save_it = FALSE,
   name_save = NULL,
+  font_size = 9,
   ...
 )
 }
 \arguments{
-\item{x}{An object of class MizerSim}
+\item{sim}{An object of class MizerSim}
 
 \item{power}{The abundance is plotted as the number density times the weight raised to power.
 The default power = 1 gives the biomass density, whereas power = 2 gives the biomass density
 with respect to logarithmic size bins.}
 
-\item{wlim}{A numeric vector of length two providing lower and upper limits for the x axis.
-Use NA to refer to the existing minimum or maximum. Default is c(0.001,NA).}
-
 \item{save_it}{Boleean value that determines whether to save the output of the function or not.
 Default is FALSE}
 
 \item{name_save}{Character string to give a specific name if saving the plot. Default is NULL}
+
+\item{font_size}{Determines the font size of the labels and ticks. Default is 9.}
 }
 \description{
 Left column (top to bottom) is: size spectrum, feeding level, predation
