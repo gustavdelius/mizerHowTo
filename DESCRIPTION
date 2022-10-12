@@ -47,6 +47,7 @@ Collate:
     'data.R'
     'mizerHowTo-package.R'
     'calibration_functions.R'
+    'plots.R'
 Remotes: 
     sizespectrum/mizerExperimental
 RoxygenNote: 7.2.1
