@@ -19,7 +19,6 @@ params_guessed <- sim_guessed@params
 
 ```
 
-# Intermediate level tutorial - how to calibrate a Mizer model
 
 In this tutorial you will learn 
 
@@ -87,7 +86,7 @@ stopCluster(cl)
 ```
 
 
-```{r step 1 - results, message=FALSE,warning=FALSE}
+```{r step 1 - results, message=FALSE,warning=FALSE, fig.height = 10}
 # if previous block wasn't run, load the saved value
 # load("optimParallel_Rmax1.RDS")
 # optim_result <- optim_result
@@ -251,7 +250,7 @@ sim_loop <- project(params_loop, effort = 1, progress_bar = F)
 ```
 
 
-```{r step 2 - sim loop diag, eval = T, echo = F}
+```{r step 2 - sim loop diag, eval = T, echo = F, fig.height = 10}
 
 sim_loop <- HTM2_sim_optim3
 plotCalibration(sim_loop, catch_dat = catchAvg$Catch_1419_tonnes)
@@ -278,7 +277,14 @@ plotGrowthCurves2(sim_loop, species_panel = T)
 Most species have a growth curve similar to the expected von Bertalanffy growth curve, apart from Sprat and Sandeel which have much slower growth than expected. `kappa`, which is the carrying capacity of the background spectrum will affect the food availability and therefore the growth rate (more food means faster growth). However, changing `kappa` will affect all growth curves. If only a few species are off, we need to change the `gamma` parameter (search volume) per species.
 
 ```{r step 3 - feeding level, echo = F}
-plotFeedingLevel2(sim_loop, include_critical = T)
+p <- plotFeedingLevel(sim_loop, include_critical = T)
+p <- p + 
+    theme(panel.background = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.grid.major = element_line(color = "gray"),
+          panel.border = element_rect(colour = "gray", fill=NA, size=.5),
+          legend.key = element_rect(fill = "white"))
+p
 ```
 
 The plot above shows the "feeding level", which is the ratio between consumption and maximum consumption. It therefore cannot exceed 1. The lower straight lines show the "critical feeding level", which is the amount of food needed to keep the fish from starving. The feeding level here shows that the species reaching the highest size classes have a feeding level close to one, meaning that they feed to satiation. Let's look at their diet to check what makes them to full.
@@ -319,7 +325,7 @@ shiny_gamma(param = HTM2_sim_optim3@params, dat = catchAvg$Catch_1419_tonnes)
 
 Let's input the new gamma value in a new set of parameters
 
-```{r step 3 updating gamma}
+```{r step 3 updating gamma, fig.height = 10}
 newGamma <- c(1.100000e-10, 6.000000e-11, 9.910525e-11, 7.707098e-11, 2.556902e-11, 4.717030e-11, 5.272039e-11, 1.009092e-10, 4.565019e-11, 7.837794e-11, 4.000000e-10, 2.365167e-10)
 
 params_growth <- sim_loop@params
@@ -335,7 +341,14 @@ Small oscillations but the species stabilise again.
 ```{r step 3 new gamma growth, echo = F}
 plotGrowthCurves2(sim_growth, species_panel = T)
 
-plotFeedingLevel2(sim_growth, include_critical = T)
+p <- plotFeedingLevel(sim_loop, include_critical = T)
+p <- p + 
+    theme(panel.background = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.grid.major = element_line(color = "gray"),
+          panel.border = element_rect(colour = "gray", fill=NA, size=.5),
+          legend.key = element_rect(fill = "white"))
+p
 ```
 
 Growth curves haven't changed much but the feeding level has decreased at small size (even if we theoretically increase the feeding of the small species, maybe they are now too good a competitor for the other species and steal their food)

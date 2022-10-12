@@ -10,9 +10,7 @@ place: Hobart, Australia
 always_allow_html: yes
 ---
 
-# Beginner level tutorial - how to parameterise a Mizer model
-
-In this tutorial you will learn 
+In this tutorial for beginners, you will learn 
 
 - What type of data is needed to parameterise a Mizer model
 
@@ -25,9 +23,11 @@ In this tutorial you will learn
 You are encouraged to run the commands in this tutorial in your own RStudio session.
 Before you start, you should make sure that you have the latest version of the
 `mizerHowTo` package by running the command
+
 ```{r eval = FALSE}
 devtools::install_github("sizespectrum/mizerHowTo")
 ```
+
 You should run the above command even if you already installed the package
 before, because it is currently changing all the time and reinstalling it will 
 give you the latest version. If you happen to already have the latest version 
@@ -47,17 +47,17 @@ That will print some messages that you can ignore.
 ```{r step 1 - Parameter description table, echo = F}
 
 param_description <- data.frame("parameter" = c("w_inf","w_mat","beta","sigma","R_max","k_vb","l25","l50",
-                                               "a","b","catchability","h","k","ks","z0","gamma","w_mat25","erepro"),
-                               "description" = c("asymptotic weigth",
-                                                 "maturation weight (determines when 50% of the population has matured using a sigmoid function)",
-                                                 "preferred predator/prey mass ratio","width of the feeding kernel",
-                                                 "Beverton-Holt density dependence parameter",
-                                                 "von Bertalanffy growth parameter","length at 25% catch","length at 50% catch",
-                                                 "coefficient for age to size conversion",
-                                                 "constant for age to size conversion","fisheries efficiency","maximum intake rate","metabolism constant",
-                                                 "metabolism coefficient","background mortality coefficient",
-                                                 "search volume (obtained from beta and sigma)",
-                                                 "weight at which 25% of individuals are mature","reproductive output scalar")
+                                                "a","b","catchability","h","k","ks","z0","gamma","w_mat25","erepro"),
+                                "description" = c("asymptotic weigth",
+                                                  "maturation weight (determines when 50% of the population has matured using a sigmoid function)",
+                                                  "preferred predator/prey mass ratio","width of the feeding kernel",
+                                                  "Beverton-Holt density dependence parameter",
+                                                  "von Bertalanffy growth parameter","length at 25% catch","length at 50% catch",
+                                                  "coefficient for age to size conversion",
+                                                  "constant for age to size conversion","fisheries efficiency","maximum intake rate","metabolism constant",
+                                                  "metabolism coefficient","background mortality coefficient",
+                                                  "search volume (obtained from beta and sigma)",
+                                                  "weight at which 25% of individuals are mature","reproductive output scalar")
 )
 
 knitr::kable(param_description, caption = "parameters' description")
@@ -217,8 +217,8 @@ params_uncalibrated@linecolour[1:12] <- viridis::viridis(dim(params_uncalibrated
 
 ```{r step 2 - mizerParams table NS, echo = F}
 knitr::kable(params_uncalibrated@species_params[,-which(colnames(params_uncalibrated@species_params) %in% 
-                                             c("sel_func","gear","interaction_resource","pred_kernel_type","m","alpha","n","p","q",
-                                               "w_min","w_mat25","k","yield_observed","biomass_observed","cutoff_size"))],row.names = F, caption = "mizerParams object")
+                                                            c("sel_func","gear","interaction_resource","pred_kernel_type","m","alpha","n","p","q",
+                                                              "w_min","w_mat25","k","yield_observed","biomass_observed","cutoff_size"))],row.names = F, caption = "mizerParams object")
 
 ```
 
@@ -314,22 +314,16 @@ The ecosystem looks way better. Saithe's largest individuals are having a hard t
 $R_{max}$ affects the density-dependent reproduction rate ($RDD$) by limiting the maximum amount of recruits surviving from the density-independent reproduction rate ($RDI$). Let's look at the $RDI/RDD$ ratio to see how strong $R_{max}$ acts on our different species.
 
 ```{r step 3 - RDD/RDI, echo = F}
-plot_dat <- as.data.frame(getRDI(sim_guessed@params)/getRDD(sim_guessed@params))
-plot_dat$species <- factor(rownames(plot_dat),sim_guessed@params@species_params$species)
-colnames(plot_dat)[1] <- "ratio"
-plot_dat$w_inf <- sim_guessed@params@species_params$w_inf
 
-ggplot(plot_dat)+
-   geom_point(aes(x = w_inf, y = ratio, color = species), size = 6, alpha = .8) +
-   ggrepel::geom_text_repel(aes(x = w_inf, y = ratio, label = species), hjust = 0, nudge_x = 0.05)+
-   scale_y_continuous(name = "Density-independent / density-dependent reproduction rate", trans = "log10") +
-   scale_x_continuous(name = "Asymptotic size (g)", trans = "log10") +
-   scale_colour_manual(values = sim_guessed@params@linecolour) +
-   theme(panel.background = element_blank(), 
-         panel.border = element_rect(colour = "gray", fill=NA, size=.5),
-         text = element_text(size=10),
-         panel.grid.minor = element_line(color = "gray"),
-         legend.position = "bottom",legend.key = element_rect(fill = "white"))
+p <- plotRdiVsRdd(sim_guessed@params)
+p <- p +
+    theme(panel.background = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.grid.major = element_line(color = "gray"),
+          panel.border = element_rect(colour = "gray", fill=NA, size=.5),
+          legend.position = "bottom",
+          legend.key = element_rect(fill = "white"))
+p
 
 ```
 
@@ -356,6 +350,7 @@ The figure below shows an example of a calibrated ecosystem. It is obtained from
 
 Let's compare it to our own little ecosystem
 
-```{r warning= F}
+```{r warning= F, fig.dim = c(10, 15)}
 plotSummary(sim_guessed)
+
 ```

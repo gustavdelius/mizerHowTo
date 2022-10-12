@@ -9,7 +9,7 @@ css: custom.css
   # pdf_document: default
 ---
 
-# Introduction 
+## Introduction 
 
 
 There are many emerging size spectrum modelling (including mizer) applications that aim to examine changes in time series through time. Depending on your question and the goals you have in mind for your model, it may even be worth fitting models to time series data. We may wish to discuss this later. A first step in exploration of ecosystem models with time series however, often starts by simply varying input or "forcing" parameters through time. 
@@ -27,7 +27,7 @@ Aims of this practical example:
 
 We previously forced with fishing mortality time series using the North Sea model and there are examples for this in the mizer vignette. This model compared predictions to observations, but we did not capture directional environmental change (only noise in the realised recruitment). One potential issue with the deterministic version of the  model is related to the stock recruitment dynamics we assumed. First, we assumed an eRepro of 1 (which essentially ignores any losses of eggs, and assumes all eggs enter the size spectrum are available to be eaten and potentially grow). The second assumption was related to our values of Rmax. We calibrated the model to catches and biomass and estimated Rmax values (least known parameter). 
 
-PART A. Explore the calibrated model and apply the dynamical forcing.
+## PART A. Explore the calibrated model and apply the dynamical forcing.
 
 Preliminary set up again... if needed.
 ```{r}
@@ -61,11 +61,11 @@ plotlyGrowthCurves(sim,percentage=T)
 plotDiet(params,species="Cod")
 ```
 
-If we agree the model has reached an equilibrium, we can take these equilibrium values (n form last timestep) and set up a dynamical run through time (a simlar example is also shown in the mizer vignette).
+If we agree the model has reached an equilibrium, we can take these equilibrium values (n from last timestep) and set up a dynamical run through time (a similar example is also shown in the mizer vignette).
 
-#### Changing the fishing parameters
+### Changing the fishing parameters
 
-Note we have sigmoidal trawl slectivity parameters, but we need to set up a gear for each species to force each species separately. To do this, we need to rebuild the params object: 
+Note we have sigmoidal trawl selectivity parameters, but we need to set up a gear for each species to force each species separately. To do this, we need to rebuild the params object: 
 
 ```{r}
 inter <- sim@params@interaction

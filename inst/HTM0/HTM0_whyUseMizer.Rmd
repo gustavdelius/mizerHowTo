@@ -209,7 +209,7 @@ plot_Brel_all
 ```
 
 
-## Example 2: Set up your own fishing scenario
+## Example 1: Set up your own fishing scenario
 
 Rather than an entire time-series, we can also simply examine differences between two time-averaged states under different fishing regimes.
 
@@ -269,7 +269,7 @@ row.names(yield)<-c("light","heavy")
 **Exercise: Now try to edit the above code to create your own fishing scenario.** 
  
 
-## Example 3: Add a species to the North Sea model
+## Example 2: Add a species to the North Sea model
 
 Let's start with the North Sea model as in Example 1.
 
@@ -323,8 +323,4 @@ And look at the growth curves, compared to von Bertalanffy growth curves.
 ```{r}
 plotGrowthCurves(new_params, species_panel = TRUE)
 ```
-
-**Exercise: Now vary the biomass_observed of squid, and see if you can still get a sensible steady state.** 
-
-
 
