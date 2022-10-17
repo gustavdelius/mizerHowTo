@@ -124,23 +124,33 @@ getError <- function(vary,params,dat,data_type="catch", tol = 0.1,timetorun=10)
 
 
 
-#' Wrapper for optimParallel
+#' @title Wrapper for optimParallel
 #'
-#' The function sets up the parallel environment to run optimParallel
+#' @description The function sets up the parallel environment to run optimParallel
 #' on a params object
 #'
 #' @param params A mizer params object
-#' @param vary Dataframe containing which parameters should vary and their upper and lower boundary
+#' @param vary Vector containing the values of the parameters to vary
+#' @param vary_df Dataframe used to fill the params object with `vary`. Its dimension
+#' should be number of different parameters x 6. Its column are `name`, `length`
+#' for the number of values associated to the parameter, `lower` and `upper` for
+#' the lower and upper boundaries to explore with `optimparallel`, `slot` for the
+#' slot name in the params object where the parameter is stored and `unit` if the
+#' parameter is not stored in `vary` in linear unit.
 #' @param errorFun What error function should be used
-#' @param errorArgs Arguments for getError if necessary as a list (could contain params)
-#' @param observed_data Data getError is compared to
+#' @param data_type Data getError is compared to. Can be yield_observed or
+#' biomass_observed. A column named the same way must be present in the params
+#' object, which contain the empirical data to compare to.
+#' @param spareCores A numeric value to tell optimparallel how many cores should
+#' be left unused. Default is one.
 #'
 #' @export
 
-fastOptim <- function(params, vary, errorFun, errorArgs = NULL)
+fastOptim <- function(params, vary, vary_df, errorFun, data_type = "biomass_observed", spareCores = 1)
 {
     # set up workers
-    noCores <- parallel::detectCores() - 1 # keep some spare core
+    noCores <- parallel::detectCores() - spareCores # keep some spare core
+    if(noCores < 1) stop("You should allow at least one core for this operation.")
     cl <- parallel::makeCluster(noCores, setup_timeout = 0.5)
     setDefaultCluster(cl = cl)
     clusterExport(cl, varlist = "cl",envir=environment())
@@ -149,15 +159,15 @@ fastOptim <- function(params, vary, errorFun, errorArgs = NULL)
         library(optimParallel)
     })
 
-    optim_result <- optimParallel::optimParallel(par = vary$data,
+    optim_result <- optimParallel::optimParallel(par = vary,
                                                  fn = errorFun,
                                                  params = params,
-                                                 errorArgs = errorArgs,
+                                                 data_type = data_type,
+                                                 vary_df = vary_df,
                                                  method   ="L-BFGS-B",
-                                                 lower= vary$lower,
-                                                 upper= vary$upper,
-                                                 parallel=list(loginfo=TRUE, forward=TRUE))#,
-    #plankton_forcing, therMizerEncounter, therMizerPredRate, therMizerEReproAndGrowth, scaled_temp_fun)
+                                                 lower= c(vary_df$lower),
+                                                 upper= c(vary_df$upper),
+                                                 parallel=list(loginfo=TRUE, forward=TRUE))
     stopCluster(cl)
 
     return(optim_result)
@@ -166,73 +176,64 @@ fastOptim <- function(params, vary, errorFun, errorArgs = NULL)
 
 #' Improving getError
 #'
+#' @description This function is a more versatile version of `getError` that takes
+#' any parameter from the species_params slot (currently but may be extended). To
+#' work in tandem with optimparallel, the information about the parameters to be
+#' varied is divided into two arguments: `vary` which must be numeric and `vary_df`
+#' which is used to put the different values from vary in the right spots.
 #'
+#' @inheritParams fastOptim
+#' @param tol The simulation stops when the relative change in the egg production
+#' RDI over t_per years is less than tol for every species. See `projectToSteadty`
+#' documentation
+#' @param timetorun `t_max` for the `project` function. Lower value will yield
+#' faster run but to the cost of accuracy. Default is 10.
 #'
-#'
+#' @export
 
 
 
 
-getErrorCustom <- function(vary, params, errorArgs, tol = 0.001,
+getErrorCustom <- function(vary, vary_df, params, data_type = "biomass_observed",
+                           tol = 0.001,
                            timetorun = 10)
 {
-    # params@species_params$R_max[1:9]<-10^vary[1:9]
-    # params@species_params$erepro[1:9]<-vary[10:18]
-    # params@species_params$interaction_resource[1:9] <- vary[19:27]
-    #
-    # params <- setParams(params)
-    #
-    # interaction <- params@interaction
-    # interaction[] <- matrix(vary[28:108],nrow = 9) # stop at 54 if looking only at 3 biggest species
-    #
-    # params <- setInteraction(params,interaction)
-
-    params@species_params$erepro[1] <- vary$data
+    start = 1
+    for(iTrait in 1:nrow(vary_df))
+    {
+        end = start + vary_df$length[iTrait] - 1
+        switch (vary_df$slot[iTrait],
+                "species_params" = {
+                    if(vary_df$unit[iTrait] == "log10"){
+                        params@species_params[vary_df$name[iTrait]] <- 10^vary[start:end]
+                    } else {
+                        params@species_params[vary_df$name[iTrait]] <- vary[start:end]
+                    }
+                },
+                {stop("unknown parameter to vary")}
+        )
+        start = start + vary_df$length[iTrait]
+    }
 
     params <- projectToSteady(params, distance_func = distanceSSLogN,
-                              tol = tol, t_max = length(times), return_sim = F)
+                              tol = tol, t_max = 200, return_sim = F)
 
-    sim <- project(params,t_max = length(times),t_start = 1950, progress_bar = F,initial_n =  params@initial_n, initial_n_pp = params@other_params$other$n_pp_array[1,])
+    sim <- project(params, t_max = timetorun, progress_bar = F)
 
-    # get biomass through time
-    biomass <- sweep(sim@n, 3, sim@params@w * sim@params@dw, "*")
-    biomass <- biomass[which(dimnames(biomass)$time == "2003"):which(dimnames(biomass)$time == "2020"),,] # trageting fishing period
+    ## what kind of data and output do we have?
+    if (data_type=="biomass_observed") {
+        output <-getBiomass(sim)[timetorun,]
+    } else if (data_type=="yield_observed") {
+        output <-getYield(sim)[timetorun,]
+    } else stop("unknown data type")
 
-    #get yield through time from model:
+    #replace 0 by NA to not get NaN
+    output[output == 0] <- NA
 
-    f_gear<-mizer::getFMortGear(params,effort)
-    # f_gear <- f_gear[1:13,,,,drop=F]
-    yield_species_gear <- apply(sweep(f_gear, c(1, 3, 4), biomass, "*"),
-                                c(1, 2, 3), sum)
-    # yield_species_gear
-
-    yield_species <-apply(yield_species_gear, c(1, 3), sum)
-
-    yield_frame <- melt(yield_species)
-
-    # leave out spin up and change units to tonnes
-    # y<-yield_frame[yield_frame$time >= 1947,]
-
-    # disregard zeroes - these were NAs only filled in to run the model
-
-    obs<-dat$catchT
-    pred<-yield_frame$value[1:18] # only selecting D.ele for now
-
-    # sum of squared errors, could use  log-scale of predictions and data (could change this or use other error or likelihood options)
-
-    error <- sum((log(pred[1:13]) - log(obs[1:13]))^2,na.rm=T)
-
-    plot_dat <- data.frame(obs,pred)
-    plot_dat$Year <- 2003:2020
-
-    p <- ggplot(plot_dat, aes(x = Year)) +
-        geom_line(aes(y = pred)) +
-        geom_line(aes(y = obs), color = "red")
-    print(p)
-
-    p2 <- mizer::plotBiomass(sim)
-    print(p2)
-    return(error)
+    # sum of squared errors, here on log-scale of predictions and data (could change this or use other error or likelihood options)
+    discrep <- log(output) - log(params@species_params[data_type])
+    discrep <- (sum(discrep^2, na.rm = T))
+    return(discrep)
 }
 
 
