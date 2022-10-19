@@ -2,10 +2,18 @@
 % Please edit documentation in R/shiny_apps.R
 \name{shiny_gamma}
 \alias{shiny_gamma}
-\title{shiny app to tweak gamma per species and see the effects on growth}
+\title{Gamma calibration app}
 \usage{
 shiny_gamma(params, dat = NULL)
 }
+\arguments{
+\item{params}{An object of class \linkS4class{MizerParams}.}
+
+\item{dat}{A dataframe containing the yield value, to pass to \code{plotPredObsYield}.
+Default is null (plot won't be displayed).}
+}
 \description{
-shiny app to tweak gamma per species and see the effects on growth
+Shiny app which focus on tweaking gamma per species and see the
+effects on growth, feeding level, diet and shape of the size spectrum / biomass
+through time
 }

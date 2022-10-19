@@ -124,83 +124,108 @@ shinyApp(ui = ui, server = server)
 
 
 
+#' @title Gamma calibration app
 
-#' shiny app to tweak gamma per species and see the effects on growth
+#' @description Shiny app which focus on tweaking gamma per species and see the
+#' effects on growth, feeding level, diet and shape of the size spectrum / biomass
+#' through time
+#'
+#' @param params An object of class \linkS4class{MizerParams}.
+#' @param dat A dataframe containing the yield value, to pass to `plotPredObsYield`.
+#' Default is null (plot won't be displayed).
 #'
 #' @export
 
 shiny_gamma <- function(params, dat = NULL)
 {
 
-params_shiny <- params
+    params_shiny <- params
 
-ui=fluidPage(
-  titlePanel("Gamma calibration"),
-  fluidRow(
-    column(4,
-           wellPanel(
-             actionButton("run", "Run the simulation")
-           ),
-            wellPanel(
-               uiOutput("toggle_gamma"))
-           )
-    ),
-    column(6,
-           plotOutput("plot1", width = 600, height = 600),
-           plotOutput("plot2", width = 600, height = 600),
-           plotOutput("plot3", width = 600, height = 600),
-           if(!is.null(dat)) plotOutput("plot4", width = 600, height = 600)
-    )
-  )
-
-
-server = function(input, output) {
-  output$toggle_gamma <- renderUI({
-      n_spec <- length(params_shiny@species_params$species)
-      lapply(1:n_spec, function(i) {
-        div(
-          paste(params_shiny@species_params$species[i] , 'Initial Value:' , params_shiny@species_params$gamma[i]) , 
-          numericInput(inputId = paste0('gamma' , i) , "Search volume:", min = .1*params_shiny@species_params$gamma[i], max = 10*params_shiny@species_params$gamma[i],
-                       value = params_shiny@species_params$gamma[i]) , 
+    ui=fluidPage(
+        titlePanel("Gamma calibration"),
+        fluidRow(
+            column(2,
+                   wellPanel(
+                       actionButton("run", "Run the simulation")
+                   ),
+                   wellPanel(
+                       actionButton("done", "Return", icon = icon("check"),
+                                    onclick = "setTimeout(function(){window.close();},500);")
+                   ),
+                   wellPanel(
+                       uiOutput("toggle_gamma"))
+            )
+            ,
+            column(5,
+                   plotOutput("plotGrowth", height = 600),
+                   plotOutput("plotFeed", height = 600),
+                   if(!is.null(dat)) plotOutput("plotYield", height = 600)
+            ),
+            column(5,
+                   plotOutput("plotDiet", height = 600),
+                   plotOutput("plotCal", height = 600)
+            )
         )
-      })
-    })
-  # reactive expression
-  sim <- eventReactive(input$run, {
-    
-    new_gamma <- c(sapply(1:6, function(i) {
-        inputName <- paste("gamma", i, sep = "")
-        input[[inputName]]
-      }))
-      
-    print(new_gamma)
-    shiny_gamma_output <<- new_gamma
-    
-    params_shiny@species_params$gamma <- new_gamma
-    params_shiny <- setParams(params_shiny)
-    # print(params_shiny@species_params$gamma) # check if everything is going well
-    sim_shiny <- project(params_shiny, effort = 1, t_max = 100)
-  })
+    )
 
-  output$plot1 <- renderPlot({
-    plotGrowthCurves2(sim(), species_panel = T)
-  })
+    server <- function(input, output) {
+        output$toggle_gamma <- renderUI({
+            n_spec <- length(params_shiny@species_params$species)
+            lapply(1:n_spec, function(i) {
+                div(
+                    paste(params_shiny@species_params$species[i],
+                          'Initial Value:',
+                          params_shiny@species_params$gamma[i]),
+                    numericInput(inputId = paste0('gamma', i),
+                                 "Search volume:",
+                                 value = params_shiny@species_params$gamma[i])
+                )
+            })
+        })
+        # reactive expression
+        sim <- eventReactive(input$run, {
+            n_spec <- length(params_shiny@species_params$species)
+            new_gamma <- c(sapply(1:n_spec, function(i) {
+                inputName <- paste("gamma", i, sep = "")
+                input[[inputName]]
+            }))
 
-  output$plot2 <- renderPlot({
-    plotFeedingLevel2(sim(), include_critical = T)
-  })
+            shiny_gamma_output <<- new_gamma
 
-  output$plot3 <- renderPlot({
-    plotCalibration(sim())
-  })
-  if(!is.null(dat))
-    {output$plot4 <- renderPlot({
-    plotPredObsYield(sim(),dat)
-  })
-  }
-}
+            params_shiny@species_params$gamma <- new_gamma
+            params_shiny <- setParams(params_shiny)
+            sim_shiny <- project(params_shiny, effort = 1, t_max = 100)
+        })
 
-shinyApp(ui, server)
+        output$plotGrowth <- renderPlot({
+            plotGrowthCurves2(sim(), species_panel = T)
+        })
+
+        output$plotFeed <- renderPlot({
+            plotFeedingLevel(sim(), include_critical = T)
+        })
+
+        output$plotCal <- renderPlot({
+            plotCalibration(sim())
+        })
+
+        if(!is.null(dat))
+        {output$plotYield <- renderPlot({
+            plotPredObsYield(sim(),dat)
+        })
+        }
+
+        output$plotDiet <- renderPlot({
+            plotDiet2(sim())
+        })
+
+        observeEvent(input$done, {
+            stopApp(sim()@params@species_params$gamma)
+        })
+
+    }
+
+    runGadget(ui, server, viewer = browserViewer())
 }
 
 
