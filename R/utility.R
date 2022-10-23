@@ -178,8 +178,8 @@ fastOptim <- function(params, vary, vary_df,
                                                  vary_df = vary_df,
                                                  time_series = time_series,
                                                  method   ="L-BFGS-B",
-                                                 lower= c(vary_df$lower),
-                                                 upper= c(vary_df$upper),
+                                                 lower= rep(vary_df$lower,vary_df$length),
+                                                 upper= rep(vary_df$upper,vary_df$length),
                                                  parallel=list(loginfo=TRUE, forward=TRUE))
     stopCluster(cl)
 
