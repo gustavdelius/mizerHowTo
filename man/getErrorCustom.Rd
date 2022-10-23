@@ -9,6 +9,8 @@ getErrorCustom(
   vary_df,
   params,
   data_type = "biomass_observed",
+  effort = 0,
+  time_series = NULL,
   tol = 0.001,
   timetorun = 10
 )
@@ -28,6 +30,15 @@ parameter is not stored in \code{vary} in linear unit.}
 \item{data_type}{Data getError is compared to. Can be yield_observed or
 biomass_observed. A column named the same way must be present in the params
 object, which contain the empirical data to compare to.}
+
+\item{effort}{Effort values to pass to the \code{project} function when using
+\code{getErrorCustom}. Default is 0 (no fishing effort).}
+
+\item{time_series}{If the result of the projected biomass or yield must be
+compared to a time series of value instead of a unique value found in the
+"observed" column of species_params, the user can supply a matrix of values
+through this argument. The dimension should be the same as \code{getBiomass} output
+(time x species). Default is NULL}
 
 \item{tol}{The simulation stops when the relative change in the egg production
 RDI over t_per years is less than tol for every species. See \code{projectToSteadty}
