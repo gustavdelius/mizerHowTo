@@ -141,12 +141,23 @@ getError <- function(vary,params,dat,data_type="catch", tol = 0.1,timetorun=10)
 #' @param data_type Data getError is compared to. Can be yield_observed or
 #' biomass_observed. A column named the same way must be present in the params
 #' object, which contain the empirical data to compare to.
+#' @param effort Effort values to pass to the `project` function when using
+#' `getErrorCustom`. Default is 0 (no fishing effort).
+#' @param time_series If the result of the projected biomass or yield must be
+#' compared to a time series of value instead of a unique value found in the
+#' "observed" column of species_params, the user can supply a matrix of values
+#' through this argument. The dimension should be the same as `getBiomass` output
+#' (time x species). Default is NULL
 #' @param spareCores A numeric value to tell optimparallel how many cores should
 #' be left unused. Default is one.
 #'
 #' @export
 
-fastOptim <- function(params, vary, vary_df, errorFun, data_type = "biomass_observed", spareCores = 1)
+fastOptim <- function(params, vary, vary_df,
+                      errorFun,
+                      data_type = "biomass_observed",
+                      effort = 0, time_series = NULL,
+                      spareCores = 1)
 {
     # set up workers
     noCores <- parallel::detectCores() - spareCores # keep some spare core
@@ -163,7 +174,9 @@ fastOptim <- function(params, vary, vary_df, errorFun, data_type = "biomass_obse
                                                  fn = errorFun,
                                                  params = params,
                                                  data_type = data_type,
+                                                 effort = effort,
                                                  vary_df = vary_df,
+                                                 time_series = time_series,
                                                  method   ="L-BFGS-B",
                                                  lower= c(vary_df$lower),
                                                  upper= c(vary_df$upper),
@@ -194,7 +207,10 @@ fastOptim <- function(params, vary, vary_df, errorFun, data_type = "biomass_obse
 
 
 
-getErrorCustom <- function(vary, vary_df, params, data_type = "biomass_observed",
+getErrorCustom <- function(vary, vary_df, params,
+                           data_type = "biomass_observed",
+                           effort = 0,
+                           time_series = NULL,
                            tol = 0.001,
                            timetorun = 10)
 {
@@ -205,9 +221,16 @@ getErrorCustom <- function(vary, vary_df, params, data_type = "biomass_observed"
         switch (vary_df$slot[iTrait],
                 "species_params" = {
                     if(vary_df$unit[iTrait] == "log10"){
-                        params@species_params[vary_df$name[iTrait]] <- 10^vary[start:end]
+                        params@species_params[vary_df$name[iTrait]][1:vary_df$length[iTrait],] <- 10^vary[start:end]
                     } else {
-                        params@species_params[vary_df$name[iTrait]] <- vary[start:end]
+                        params@species_params[vary_df$name[iTrait]][1:vary_df$length[iTrait],] <- vary[start:end]
+                    }
+                },
+                "gear_params" = {
+                    if(vary_df$unit[iTrait] == "log10"){
+                        params@gear_params[vary_df$name[iTrait]][1:vary_df$length[iTrait],] <- 10^vary[start:end]
+                    } else {
+                        params@gear_params[vary_df$name[iTrait]][1:vary_df$length[iTrait],] <- vary[start:end]
                     }
                 },
                 {stop("unknown parameter to vary")}
@@ -218,21 +241,33 @@ getErrorCustom <- function(vary, vary_df, params, data_type = "biomass_observed"
     params <- projectToSteady(params, distance_func = distanceSSLogN,
                               tol = tol, t_max = 200, return_sim = F)
 
-    sim <- project(params, t_max = timetorun, progress_bar = F)
+    sim <- project(params, t_max = timetorun, progress_bar = F, effort = effort)
 
-    ## what kind of data and output do we have?
-    if (data_type=="biomass_observed") {
-        output <-getBiomass(sim)[timetorun,]
-    } else if (data_type=="yield_observed") {
-        output <-getYield(sim)[timetorun,]
-    } else stop("unknown data type")
+    if(!is.null(time_series))
+    {
+        if (data_type=="biomass_observed") {
+            output <-getBiomass(sim)
+        } else if (data_type=="yield_observed") {
+            output <-getYield(sim)
+        } else stop("unknown data type")
 
-    #replace 0 by NA to not get NaN
-    output[output == 0] <- NA
+        output[output == 0] <- NA
+        discrep <-     log(output) - log(time_series)
+        discrep <- (sum(discrep^2, na.rm = T))
+    } else {
+        ## what kind of data and output do we have?
+        if (data_type=="biomass_observed") {
+            output <-getBiomass(sim)[timetorun,]
+        } else if (data_type=="yield_observed") {
+            output <-getYield(sim)[timetorun,]
+        } else stop("unknown data type")
 
-    # sum of squared errors, here on log-scale of predictions and data (could change this or use other error or likelihood options)
-    discrep <- log(output) - log(params@species_params[data_type])
-    discrep <- (sum(discrep^2, na.rm = T))
+        #replace 0 by NA to not get NaN
+        output[output == 0] <- NA
+        # sum of squared errors, here on log-scale of predictions and data (could change this or use other error or likelihood options)
+        discrep <- log(output) - log(params@species_params[data_type])
+        discrep <- (sum(discrep^2, na.rm = T))
+    }
     return(discrep)
 }
 
