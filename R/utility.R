@@ -237,29 +237,26 @@ getErrorCustom <- function(vary, vary_df, params,
         )
         start = start + vary_df$length[iTrait]
     }
-
-    params <- projectToSteady(params, distance_func = distanceSSLogN,
-                              tol = tol, t_max = 200, return_sim = F)
-
-    sim <- project(params, t_max = timetorun, progress_bar = F, effort = effort)
+    params <- setParams(params)
+    params_steady <- projectToSteady(params, distance_func = distanceSSLogN,
+                                     tol = tol, t_max = 200, return_sim = F)
+    sim_error <- project(params_steady, t_max = timetorun, progress_bar = F, effort = effort)
 
     if(!is.null(time_series))
     {
         if (data_type=="biomass_observed") {
-            output <-getBiomass(sim)
+            output <-getBiomass(sim_error)
         } else if (data_type=="yield_observed") {
-            output <-getYield(sim)
+            output <-getYield(sim_error)
         } else stop("unknown data type")
-
         output[output == 0] <- NA
-        discrep <-     log(output) - log(time_series)
+        discrep <- log(output) - log(time_series)
         discrep <- (sum(discrep^2, na.rm = T))
     } else {
-        ## what kind of data and output do we have?
         if (data_type=="biomass_observed") {
-            output <-getBiomass(sim)[timetorun,]
+            output <-getBiomass(sim_error)[timetorun,]
         } else if (data_type=="yield_observed") {
-            output <-getYield(sim)[timetorun,]
+            output <-getYield(sim_error)[timetorun,]
         } else stop("unknown data type")
 
         #replace 0 by NA to not get NaN
