@@ -242,10 +242,29 @@ getErrorCustom <- function(vary, vary_df, params,
                                      tol = tol, t_max = 200, return_sim = F)
     sim_error <- project(params_steady, t_max = timetorun, progress_bar = F, effort = effort)
 
+    # setting up cutoffs now instead of twice later
+    cutoffLow <- params@species_params$biomass_cutoffLow
+    if (is.null(cutoffLow))
+        cutoffLow <- rep(0, length(params@species_params$species))
+    cutoffLow[is.na(cutoffLow)] <- 0
+
+    cutoffHigh <- params@species_params$biomass_cutoffHigh
+    if (is.null(cutoffHigh))
+        cutoffHigh <- params@species_params$w_inf * 10 # species can grow over one size class over w_inf
+    cutoffHigh[is.na(cutoffHigh)] <- params@w[length(params@w)]
+
     if(!is.null(time_series))
     {
         if (data_type=="biomass_observed") {
-            output <-getBiomass(sim_error)
+            output = time_series # getting the same format
+            output[] <- NA
+            for (iSpecies in 1:dim(output)[2]) {
+                for(iTime in 1:dim(output)[1] )
+                    output[iTime,iSpecies] =
+                        sum((sim_error@n[iTime,iSpecies,] * params@w * params@dw)
+                            [params@w >= cutoffLow[iSpecies] & cutoffHigh[iSpecies] >= params@w])
+            }
+            # output <-getBiomass(sim_error)
         } else if (data_type=="yield_observed") {
             output <-getYield(sim_error)
         } else stop("unknown data type")
@@ -254,7 +273,14 @@ getErrorCustom <- function(vary, vary_df, params,
         discrep <- (sum(discrep^2, na.rm = T))
     } else {
         if (data_type=="biomass_observed") {
-            output <-getBiomass(sim_error)[timetorun,]
+            output = rep(0, length(params@species_params$species))
+            for (iSpecies in 1:length(output)) {
+                output[iSpecies] =
+                    sum((sim_error@n[timetorun,iSpecies,] * params@w * params@dw)
+                        [params@w >= cutoffLow[iSpecies] & cutoffHigh[iSpecies] >= params@w])
+            }
+            names(output) <- params@species_params$species
+            # output <-getBiomass(sim_error)[timetorun,]
         } else if (data_type=="yield_observed") {
             output <-getYield(sim_error)[timetorun,]
         } else stop("unknown data type")
@@ -267,6 +293,8 @@ getErrorCustom <- function(vary, vary_df, params,
     }
     return(discrep)
 }
+
+
 
 
 
