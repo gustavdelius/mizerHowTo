@@ -3,6 +3,8 @@ title: "Why use Mizer?"
 author: "Julia L. Blanchard, Samik Datta, Romain Forestier"
 output: rmdformats::readthedown
 css: custom.css
+editor_options: 
+  chunk_output_type: console
 ---
 
 Mizer is a tool that can be used to simulate a dynamic size spectrum in an marine ecosystem, subject to changes through time, such as fishing pressure. Multiple interacting species and fishing gears can be defined allowing for a range of fisheries management strategy scenarios, and their ecosystem impacts, to be tested.
@@ -323,4 +325,83 @@ And look at the growth curves, compared to von Bertalanffy growth curves.
 ```{r}
 plotGrowthCurves(new_params, species_panel = TRUE)
 ```
+
+
+
+```{r}
+
+
+vary_df <- data.frame("name" = c("catchability"),
+                      "length" = c(1),
+                      "lower" = c(1e-15), 
+                      "upper" = c(1e-2),
+                      "slot" = c("gear_params"),
+                      "unit" = c("linear"))
+
+
+```
+
+```{r}
+params <- readRDS("~/RstudioProjects/HIMI/params/params13.rds")
+```
+
+```{r}
+load("~/RstudioProjects/HIMI/inputs/size_spec_inputs.RData")
+
+effort <-array(ll_trends$Effort, dim = c(length(ll_trends$Effort),1), 
+               dimnames = list("time" = ll_trends$Year, "gear" = params@gear_params$gear[1]))
+
+time_series <- array(0, dim = c(dim(ll_trends)[1], dim(params@species_params)[1]),
+                     dimnames = list("time" = ll_trends$Year, "species" = params@species_params$species))
+time_series[,1] <- ll_trends$CatchT * 1e6 #conversion to g
+```
+
+
+```{r}
+getErrorCustom(vary = 7e-8,
+               vary_df = vary_df, 
+               params = params, 
+               data_type = "yield_observed", 
+               effort = effort, 
+               time_series = time_series)
+
+params_test <- params
+gear_params(params_test)$catchability[1] <- 1e-5
+sim <- project(params_test, effort = effort)
+getYield(sim)
+```
+
+
+get error test
+
+```{r}
+
+
+test <- function(params, catchability)
+{
+    
+    gear_params(params)$catchability[1] <- catchability
+    
+    print(params@gear_params)
+    
+    sim <- project(params, effort = 1, t_max = 20)
+    
+    res <- getYield(sim)
+    
+    return(res)
+}
+
+```
+
+```{r}
+
+test(params, catchability = 7e-7)
+
+sim <- project(params, effort = 1, t_max = 20)
+
+getYield(sim)
+
+
+```
+
 

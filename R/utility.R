@@ -150,6 +150,10 @@ getError <- function(vary,params,dat,data_type="catch", tol = 0.1,timetorun=10)
 #' (time x species). Default is NULL
 #' @param spareCores A numeric value to tell optimparallel how many cores should
 #' be left unused. Default is one.
+#' @param libraries Any library needed by getErrorCustom must be passed to
+#' optimParallel using this argument. It must be a vector of one or more character
+#' strings to call the libraries. It must contain the optimParallel library.
+#' Default is "optimParallel".
 #'
 #' @export
 
@@ -157,17 +161,19 @@ fastOptim <- function(params, vary, vary_df,
                       errorFun,
                       data_type = "biomass_observed",
                       effort = 0, time_series = NULL,
-                      spareCores = 1)
+                      spareCores = 1,
+                      libraries = "optimParallel")
 {
     # set up workers
     noCores <- parallel::detectCores() - spareCores # keep some spare core
     if(noCores < 1) stop("You should allow at least one core for this operation.")
     cl <- parallel::makeCluster(noCores, setup_timeout = 0.5)
-    setDefaultCluster(cl = cl)
-    clusterExport(cl, varlist = "cl",envir=environment())
-    clusterEvalQ(cl, {
-        library(mizerExperimental)
-        library(optimParallel)
+    parallel::setDefaultCluster(cl = cl)
+    parallel::clusterExport(cl, varlist = c("cl","libraries"),envir=environment())
+    parallel::clusterEvalQ(cl, {
+        for (item in 1:length(libraries)) {
+            library(libraries[item],character.only = T)
+        }
     })
 
     optim_result <- optimParallel::optimParallel(par = vary,
@@ -181,10 +187,14 @@ fastOptim <- function(params, vary, vary_df,
                                                  lower= rep(vary_df$lower,vary_df$length),
                                                  upper= rep(vary_df$upper,vary_df$length),
                                                  parallel=list(loginfo=TRUE, forward=TRUE))
-    stopCluster(cl)
+    parallel::stopCluster(cl)
 
     return(optim_result)
 }
+
+
+libraries <- c("mizer","ggplot2")
+
 
 
 #' Improving getError
@@ -232,6 +242,11 @@ getErrorCustom <- function(vary, vary_df, params,
                     } else {
                         params@gear_params[vary_df$name[iTrait]][1:vary_df$length[iTrait],] <- vary[start:end]
                     }
+                },
+                "interaction" = {
+                    interaction <- params@interaction
+                    interaction[] <- matrix(vary[start:end],nrow = dim(params@species_params[1]))
+                    params <- setInteraction(params, interaction)
                 },
                 {stop("unknown parameter to vary")}
         )
