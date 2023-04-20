@@ -153,7 +153,8 @@ getError <- function(vary,params,dat,data_type="catch", tol = 0.1,timetorun=10)
 #' @param libraries Any library needed by getErrorCustom must be passed to
 #' optimParallel using this argument. It must be a vector of one or more character
 #' strings to call the libraries. It must contain the optimParallel library.
-#' Default is "optimParallel".
+#' Default is to load optimParallel and mizerExperimental to cover most of the
+#' functions used on average.
 #'
 #' @export
 
@@ -162,7 +163,7 @@ fastOptim <- function(params, vary, vary_df,
                       data_type = "biomass_observed",
                       effort = 0, time_series = NULL,
                       spareCores = 1,
-                      libraries = "optimParallel")
+                      libraries = c("optimParallel","mizerExperimental"))
 {
     # set up workers
     noCores <- parallel::detectCores() - spareCores # keep some spare core
